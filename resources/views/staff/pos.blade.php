@@ -323,8 +323,15 @@ async function startTable(){
     if(!selectedTable || selectedTable.id === 0) return;
     const res = await fetchPost(`{{ url('staff/pos') }}/${selectedTable.id}/start`);
     if(res.success){
+        const card = document.querySelector(`.table-card[data-id="${selectedTable.id}"]`);
+        if(card){
+            card.classList.add('playing');
+            card.dataset.playing = 'true';
+            if(!card.dataset.sessionStart) card.dataset.sessionStart = new Date().toISOString();
+        }
         selectedTable.playing = true;
-        selectTable(selectedTable.id, selectedTable.name, selectedTable.price, true, {started_at: new Date().toISOString()});
+        selectedTable.session = {started_at: card?.dataset.sessionStart || new Date().toISOString()};
+        selectTable(selectedTable.id, selectedTable.name, selectedTable.price, true, selectedTable.session);
     } else {
         alert(res.message || 'Không thể mở bàn');
     }
