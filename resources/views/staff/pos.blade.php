@@ -19,7 +19,7 @@
     .search-bar input::placeholder { color: rgba(255,255,255,.75); }
     .search-bar i { color: #fff; }
     .area-tabs { display: flex; gap: .5rem; overflow-x: auto; padding-bottom: .25rem; }
-    .areas-tabs .btn { white-space: nowrap; }
+    .area-tabs .btn { white-space: nowrap; }
     .table-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: .75rem; padding: .75rem; overflow-y: auto; }
     .table-card { border: 2px solid #e9ecef; border-radius: .75rem; padding: 1rem .5rem; text-align: center; cursor: pointer; transition: all .15s; background: #fff; }
     .table-card:hover { border-color: #0d6efd; transform: translateY(-2px); }
@@ -35,15 +35,15 @@
     <div class="tp-left">
         <!-- KiotViet style top nav -->
         <div class="kiot-nav" id="kiotNav">
-            <button class="kiot-tab active" id="tabTables" onclick="switchTab('tables')">
+            <button class="kiot-tab active" id="tabTables" data-tab="tables">
                 <i class="bi bi-grid"></i> Phòng bàn
             </button>
-            <button class="kiot-tab" id="tabMenu" onclick="switchTab('menu')">
+            <button class="kiot-tab" id="tabMenu" data-tab="menu">
                 <i class="bi bi-journal-text"></i> Thực đơn
             </button>
-            <div class="search-bar" id="searchBar" onclick="document.getElementById('productSearch').focus()">
+            <div class="search-bar" id="searchBar">
                 <i class="bi bi-search"></i>
-                <input type="text" class="form-control border-0 p-0" id="productSearch" placeholder="Tìm món (F3)" onkeyup="filterProducts()">
+                <input type="text" class="form-control border-0 p-0" id="productSearch" placeholder="Tìm món (F3)">
             </div>
         </div>
 
@@ -52,9 +52,9 @@
             <div class="card shadow-sm">
                 <div class="card-body py-2">
                     <div class="area-tabs" id="areaTabs">
-                        <button class="btn btn-sm btn-primary" data-area="all" onclick="filterArea('all')">Tất cả</button>
+                        <button class="btn btn-sm btn-primary" data-area="all">Tất cả</button>
                         @foreach($tables->keys() as $area)
-                            <button class="btn btn-sm btn-outline-secondary" data-area="{{ $area }}" onclick="filterArea('{{ $area }}')">{{ $area }}</button>
+                            <button class="btn btn-sm btn-outline-secondary" data-area="{{ $area }}">{{ $area }}</button>
                         @endforeach
                     </div>
                 </div>
@@ -64,14 +64,14 @@
                 <div class="card-body d-flex flex-column">
                     <h6 class="fw-bold mb-2">Chọn bàn</h6>
                     <div class="table-grid flex-grow-1" id="tableGrid">
-                        <div class="table-card active" data-id="0" data-area="" data-name="Mang về" onclick="selectTable(0, 'Mang về', 0, false, null)">
+                        <div class="table-card active" data-id="0" data-area="" data-name="Mang về" data-price="0" data-playing="false">
                             <div class="text-primary mb-1"><i class="bi bi-bag fs-2"></i></div>
                             <div class="fw-bold small">Mang về</div>
                         </div>
                         @foreach($tables as $area => $items)
                             @foreach($items as $t)
                             @php $session = $sessions->get($t->id); @endphp
-                            <div class="table-card {{ $t->status=='playing' ? 'playing' : '' }}" data-area="{{ $area }}" data-id="{{ $t->id }}" onclick="selectTable({{ $t->id }}, '{{ addslashes($t->name) }}', {{ $t->price_per_hour }}, {{ $t->status=='playing' ? 'true' : 'false' }}, {{ $session ? '{started_at:"' . $session->started_at->format('Y-m-d H:i:s') . '"}' : 'null' }})">
+                            <div class="table-card {{ $t->status=='playing' ? 'playing' : '' }}" data-area="{{ $area }}" data-id="{{ $t->id }}" data-name="{{ $t->name }}" data-price="{{ $t->price_per_hour }}" data-playing="{{ $t->status=='playing' ? 'true' : 'false' }}" data-session-start="{{ $session ? $session->started_at->format('Y-m-d H:i:s') : '' }}">
                                 <div class="text-muted mb-1"><i class="bi bi-table fs-2"></i></div>
                                 <div class="fw-bold small">{{ $t->name }}</div>
                                 <div class="small text-muted">{{ number_format($t->price_per_hour) }}đ/h</div>
@@ -92,18 +92,18 @@
                 <div class="card-body d-flex flex-column">
                     <div class="input-group mb-2">
                         <span class="input-group-text"><i class="bi bi-search"></i></span>
-                        <input type="text" class="form-control" id="productSearch2" placeholder="Tìm món" onkeyup="filterProducts2()">
+                        <input type="text" class="form-control" id="productSearch2" placeholder="Tìm món">
                         <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" id="categoryDropdownBtn">Tất cả</button>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="javascript:filterCategory('all')">Tất cả</a></li>
+                            <li><a class="dropdown-item" href="#" data-cat="all">Tất cả</a></li>
                             @foreach($categories as $cat)
-                            <li><a class="dropdown-item" href="javascript:filterCategory({{ $cat->id }})">{{ $cat->name }}</a></li>
+                            <li><a class="dropdown-item" href="#" data-cat="{{ $cat->id }}">{{ $cat->name }}</a></li>
                             @endforeach
                         </ul>
                     </div>
                     <div class="product-grid flex-grow-1 overflow-y-auto d-none" id="productGrid">
                         @foreach($products as $p)
-                        <div class="product-card" data-cat="{{ $p->category_id }}" data-name="{{ strtolower($p->name) }}" onclick="addToCart({{ $p->id }}, '{{ addslashes($p->name) }}', {{ $p->price }})">
+                        <div class="product-card" data-cat="{{ $p->category_id }}" data-name="{{ strtolower($p->name) }}" data-id="{{ $p->id }}" data-price="{{ $p->price }}">
                             <div class="text-primary mb-1"><i class="bi bi-cup-straw fs-2"></i></div>
                             <div class="fw-bold small text-truncate">{{ $p->name }}</div>
                             <div class="small text-primary fw-bold">{{ number_format($p->price) }}đ</div>
@@ -145,8 +145,8 @@
                         </select>
                     </div>
                     <div class="d-grid gap-2">
-                        <button id="startBtn" class="btn btn-primary btn-sm" onclick="startTable()" style="display:none"><i class="bi bi-play-fill"></i> Mở bàn</button>
-                        <button id="closeBtn" class="btn btn-success btn-sm" onclick="closeTable()" disabled><i class="bi bi-cash-coin"></i> Thanh toán (F9)</button>
+                        <button id="startBtn" class="btn btn-primary btn-sm" style="display:none"><i class="bi bi-play-fill"></i> Mở bàn</button>
+                        <button id="closeBtn" class="btn btn-success btn-sm" disabled><i class="bi bi-cash-coin"></i> Thanh toán (F9)</button>
                     </div>
                 </div>
             </div>
@@ -162,17 +162,39 @@ let cart = [];
 const STORAGE_KEY = 'table_pos_cart';
 
 document.addEventListener('DOMContentLoaded', () => {
+    bindEvents();
     loadCart();
     updateTimers();
     setInterval(updateTimers, 60000);
 });
 
+function bindEvents(){
+    document.getElementById('tabTables').addEventListener('click', () => switchTab('tables'));
+    document.getElementById('tabMenu').addEventListener('click', () => switchTab('menu'));
+    document.getElementById('searchBar').addEventListener('click', () => document.getElementById('productSearch').focus());
+    document.getElementById('productSearch').addEventListener('keyup', (e) => { filterProducts(); if(e.target.value.trim()) switchTab('menu'); });
+    document.getElementById('productSearch2').addEventListener('keyup', filterProducts2);
+
+    document.querySelectorAll('#areaTabs button').forEach(btn => btn.addEventListener('click', () => filterArea(btn.dataset.area)));
+    document.querySelectorAll('#tableGrid .table-card').forEach(card => card.addEventListener('click', () => {
+        const sessionStart = card.dataset.sessionStart;
+        selectTable(parseInt(card.dataset.id), card.dataset.name, parseFloat(card.dataset.price), card.dataset.playing === 'true', sessionStart ? {started_at: sessionStart} : null);
+    }));
+
+    document.querySelectorAll('.dropdown-item').forEach(item => item.addEventListener('click', (e) => { e.preventDefault(); filterCategory(item.dataset.cat); }));
+    document.querySelectorAll('#productGrid .product-card').forEach(card => card.addEventListener('click', () => addToCart(parseInt(card.dataset.id), card.dataset.name, parseFloat(card.dataset.price))));
+
+    document.getElementById('startBtn').addEventListener('click', startTable);
+    document.getElementById('closeBtn').addEventListener('click', closeTable);
+}
+
 function switchTab(tab){
     document.getElementById('tabTables').classList.toggle('active', tab === 'tables');
     document.getElementById('tabMenu').classList.toggle('active', tab === 'menu');
     document.getElementById('tablesSection').classList.toggle('d-none', tab !== 'tables');
-    document.getElementById('menuSection').classList.toggle('d-none', tab !== 'menu');
-    if(tab === 'menu'){ document.getElementById('menuSection').classList.add('d-flex'); document.getElementById('menuSection').classList.remove('d-none'); }
+    const menuSection = document.getElementById('menuSection');
+    if(tab === 'menu'){ menuSection.classList.add('d-flex'); menuSection.classList.remove('d-none'); }
+    else { menuSection.classList.remove('d-flex'); menuSection.classList.add('d-none'); }
 }
 
 function selectTable(id, name, price, playing, session){
@@ -235,15 +257,18 @@ function renderCart(){
     cart.forEach((item, idx) => { total += item.price * item.quantity; html += `<li class="list-group-item px-0 d-flex justify-content-between align-items-center">
             <div style="min-width:0;"><div class="fw-bold small text-truncate">${item.name}</div><div class="small text-muted">${item.price.toLocaleString()}đ x ${item.quantity}</div></div>
             <div class="d-flex align-items-center gap-1 flex-shrink-0">
-                <button class="btn btn-sm btn-outline-secondary py-0" onclick="updateQty(${idx}, -1)">-</button>
+                <button class="btn btn-sm btn-outline-secondary py-0 qty-btn" data-d="-1" data-idx="${idx}">-</button>
                 <span class="px-1 small">${item.quantity}</span>
-                <button class="btn btn-sm btn-outline-secondary py-0" onclick="updateQty(${idx}, 1)">+</button>
-                <button class="btn btn-sm btn-outline-danger py-0" onclick="removeItem(${idx})"><i class="bi bi-trash"></i></button>
+                <button class="btn btn-sm btn-outline-secondary py-0 qty-btn" data-d="1" data-idx="${idx}">+</button>
+                <button class="btn btn-sm btn-outline-danger py-0 del-btn" data-idx="${idx}"><i class="bi bi-trash"></i></button>
             </div>
         </li>`; });
     html += '</ul>';
     container.innerHTML = html;
     totalEl.textContent = total.toLocaleString() + 'đ';
+
+    document.querySelectorAll('.qty-btn').forEach(btn => btn.addEventListener('click', () => updateQty(parseInt(btn.dataset.idx), parseInt(btn.dataset.d))));
+    document.querySelectorAll('.del-btn').forEach(btn => btn.addEventListener('click', () => removeItem(parseInt(btn.dataset.idx))));
 }
 
 async function startTable(){
@@ -283,8 +308,8 @@ function filterArea(area){
     document.querySelectorAll('.table-card').forEach(el => el.style.display = (area === 'all' || el.dataset.area === area) ? 'block' : 'none');
 }
 function filterCategory(cat){
-    const catName = document.querySelector(`.dropdown-item[href*="filterCategory(${cat === 'all' ? \"'all'\" : cat})"]`)?.textContent || 'Tất cả';
-    document.getElementById('categoryDropdownBtn').textContent = catName;
+    const item = document.querySelector(`.dropdown-item[data-cat="${cat}"]`);
+    document.getElementById('categoryDropdownBtn').textContent = item ? item.textContent : 'Tất cả';
     const q = document.getElementById('productSearch2').value.trim().toLowerCase();
     if(cat === 'all' && q === ''){ showProductsGrid(false); return; }
     showProductsGrid(true);
@@ -297,7 +322,7 @@ function filterProducts(){
     document.querySelectorAll('#productGrid .product-card').forEach(el => {
         el.style.display = el.dataset.name.includes(q) ? 'block' : 'none';
     });
-    if(q) switchTab('menu');
+    showProductsGrid(q !== '');
 }
 function filterProducts2(){
     const q = document.getElementById('productSearch2').value.trim().toLowerCase();
