@@ -132,6 +132,12 @@ class TablePosController extends Controller
             if ($order) $order->update(['status' => 'paid', 'paid_at' => now(), 'payment_method' => $paymentMethod]);
         });
 
-        return back()->with('success', 'Đã kết thúc bàn. Tổng: ' . number_format($total) . 'đ');
+        return redirect()->route('staff.pos.bill', $session->id)->with('success', 'Đã kết thúc bàn. Tổng: ' . number_format($total) . 'đ');
+    }
+
+    public function bill(TableSession $session)
+    {
+        $session->load('table', 'orders.items.product', 'staff', 'payments');
+        return view('staff.bill', compact('session'));
     }
 }

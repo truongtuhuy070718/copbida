@@ -58,4 +58,5 @@ Route::middleware(['role:staff'])->prefix('staff')->name('staff.')->group(functi
     Route::post('/pos/{table}/start', [TablePosController::class, 'start'])->name('pos.start');
     Route::post('/pos/{table}/order', [TablePosController::class, 'addOrder'])->name('pos.order');
     Route::post('/pos/{table}/close', [TablePosController::class, 'close'])->name('pos.close');
+    Route::get('/pos/bill/{session}', [TablePosController::class, 'bill'])->name('pos.bill');
 });
