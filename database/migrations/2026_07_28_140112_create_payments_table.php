@@ -1,0 +1,27 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('payments', function (Blueprint $table) {
+            $table->id();
+            $table->morphs('payable'); // order hoặc table_session
+            $table->foreignId('staff_id')->constrained('users');
+            $table->decimal('amount', 12, 2);
+            $table->enum('method', ['cash','transfer','card'])->default('cash');
+            $table->text('note')->nullable();
+            $table->timestamp('paid_at');
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('payments');
+    }
+};
