@@ -37,8 +37,6 @@
                     <i class="bi bi-graph-up me-2"></i> Báo cáo
                 </a>
             </li>
-            @endif
-            @if(auth()->user()->role === 'staff')
             <li class="nav-item mb-1">
                 <a href="{{ route('staff.pos') }}" class="nav-link rounded {{ request()->routeIs('staff.pos') ? 'active' : '' }}">
                     <i class="bi bi-cart3 me-2"></i> POS Bán hàng
