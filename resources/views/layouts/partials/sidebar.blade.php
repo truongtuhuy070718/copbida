@@ -23,6 +23,11 @@
                 </a>
             </li>
             <li class="nav-item mb-1">
+                <a href="{{ route('admin.bills.index') }}" class="nav-link rounded {{ request()->routeIs('admin.bills.*') ? 'active' : '' }}">
+                    <i class="bi bi-receipt me-2"></i> Hóa đơn
+                </a>
+            </li>
+            <li class="nav-item mb-1">
                 <a href="{{ route('admin.staff.index') }}" class="nav-link rounded {{ request()->routeIs('admin.staff.*') ? 'active' : '' }}">
                     <i class="bi bi-people me-2"></i> Nhân viên
                 </a>

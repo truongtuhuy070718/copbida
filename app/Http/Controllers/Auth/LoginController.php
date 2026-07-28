@@ -21,7 +21,11 @@ class LoginController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->validate(['phone' => 'required|string', 'password' => 'required|string']);
-        $user = User::where('phone', $credentials['phone'])->where('active', true)->first();
+        $user = User::where(function ($q) use ($credentials) {
+            $q->where('phone', $credentials['phone'])
+              ->orWhere('name', $credentials['phone'])
+              ->orWhere('email', $credentials['phone']);
+        })->where('active', true)->first();
         if (!$user || !Hash::check($credentials['password'], $user->password)) {
             return back()->withErrors(['Thông tin đăng nhập không đúng.'])->withInput();
         }

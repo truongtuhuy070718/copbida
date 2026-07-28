@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\InventoryController;
 use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\BillController;
 use App\Http\Controllers\Staff\PosController;
 use App\Http\Controllers\Staff\TableController as StaffTableController;
 
@@ -33,7 +34,10 @@ Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(functi
     Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
     Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
 
+    Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
     Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
+    Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
+    Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
 
     Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index');
     Route::post('/inventory/adjust', [InventoryController::class, 'adjust'])->name('inventory.adjust');
@@ -44,6 +48,9 @@ Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(functi
     Route::delete('/staff/{user}', [StaffController::class, 'destroy'])->name('staff.destroy');
 
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+
+    Route::get('/bills', [BillController::class, 'index'])->name('bills.index');
+    Route::delete('/bills/orders/{order}', [BillController::class, 'destroyOrder'])->name('bills.orders.destroy');
 });
 
 // Staff

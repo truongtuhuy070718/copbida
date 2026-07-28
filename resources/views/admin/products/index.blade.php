@@ -5,7 +5,10 @@
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h5 class="fw-bold mb-0">Sản phẩm</h5>
-    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addProductModal"><i class="bi bi-plus-lg"></i> Thêm sản phẩm</button>
+    <div>
+        <a href="{{ route('admin.categories.index') }}" class="btn btn-outline-secondary btn-sm me-2"><i class="bi bi-tags"></i> Danh mục</a>
+        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addProductModal"><i class="bi bi-plus-lg"></i> Thêm sản phẩm</button>
+    </div>
 </div>
 @if(session('success'))<div class="alert alert-success py-2">{{ session('success') }}</div>@endif
 
