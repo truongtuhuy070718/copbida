@@ -29,12 +29,13 @@
 
 <div class="table-responsive">
     <table class="table table-hover align-middle bg-white shadow-sm rounded overflow-hidden">
-        <thead class="table-light"><tr><th>Tên</th><th>Danh mục</th><th>Giá</th><th>Tồn</th><th>Trạng thái</th><th></th></tr></thead>
+        <thead class="table-light"><tr><th>Tên</th><th>Danh mục</th><th>Đơn vị</th><th>Giá</th><th>Tồn</th><th>Trạng thái</th><th></th></tr></thead>
         <tbody>
             @forelse($products as $p)
             <tr>
                 <td>{{ $p->name }}</td>
                 <td>{{ $p->category?->name ?? '-' }}</td>
+                <td>{{ $p->unit?->name ?? $p->unit }}</td>
                 <td>{{ number_format($p->price) }}đ</td>
                 <td class="{{ $p->stock <= $p->min_stock ? 'text-danger fw-bold' : '' }}">{{ $p->stock }}</td>
                 <td><span class="badge {{ $p->active?'bg-success':'bg-secondary' }}">{{ $p->active?'Kích hoạt':'Khóa' }}</span></td>
@@ -70,7 +71,7 @@
                     <div class="col-6"><label class="form-label">Tồn kho</label><input type="number" name="stock" class="form-control" value="0"></div>
                     <div class="col-6"><label class="form-label">Tồn tối thiểu</label><input type="number" name="min_stock" class="form-control" value="0"></div>
                 </div>
-                <div class="mb-3 mt-2"><label class="form-label">Đơn vị</label><input name="unit" class="form-control" value="cái" required></div>
+                <div class="mb-3 mt-2"><label class="form-label">Đơn vị</label><select name="unit_id" class="form-select"><option value="">--</option>@foreach($units as $u)<option value="{{ $u->id }}">{{ $u->name }}</option>@endforeach</select></div>
             </div>
             <div class="modal-footer"><button class="btn btn-primary">Lưu</button></div>
         </form>
@@ -94,7 +95,7 @@
                     <div class="col-6"><label class="form-label">Tồn kho</label><input type="number" name="stock" class="form-control" value="{{ $p->stock }}"></div>
                     <div class="col-6"><label class="form-label">Tồn tối thiểu</label><input type="number" name="min_stock" class="form-control" value="{{ $p->min_stock }}"></div>
                 </div>
-                <div class="mb-3 mt-2"><label class="form-label">Đơn vị</label><input name="unit" class="form-control" value="{{ $p->unit }}" required></div>
+                <div class="mb-3 mt-2"><label class="form-label">Đơn vị</label><select name="unit_id" class="form-select"><option value="">--</option>@foreach($units as $u)<option value="{{ $u->id }}" {{ $p->unit_id==$u->id?'selected':'' }}>{{ $u->name }}</option>@endforeach</select></div>
                 <div class="form-check"><input class="form-check-input" type="checkbox" name="active" value="1" {{ $p->active?'checked':'' }}><label class="form-check-label">Kích hoạt</label></div>
             </div>
             <div class="modal-footer"><button class="btn btn-primary">Cập nhật</button></div>
