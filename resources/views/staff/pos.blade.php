@@ -183,7 +183,6 @@ function bindEvents(){
     document.querySelectorAll('.dropdown-item').forEach(item => item.addEventListener('click', (e) => { e.preventDefault(); filterCategory(item.dataset.cat); }));
     document.querySelectorAll('#productGrid .product-card').forEach(card => card.addEventListener('click', () => addToCart(parseInt(card.dataset.id), card.dataset.name, parseFloat(card.dataset.price))));
 
-    document.getElementById('startBtn').addEventListener('click', startTable);
     document.getElementById('closeBtn').addEventListener('click', closeTable);
 }
 
@@ -281,7 +280,6 @@ async function startTable(){
 }
 async function closeTable(){
     if(!selectedTable) return;
-    if(selectedTable.id !== 0 && !selectedTable.playing && !confirm('Bàn chưa mở, có muốn thanh toán không?')) return;
     if(cart.length){
         await fetchPost(`{{ url('staff/pos') }}/${selectedTable.id}/order`, {items: cart.map(i => ({product_id:i.product_id, quantity:i.quantity})), payment_method: document.getElementById('paymentMethod').value});
     }
