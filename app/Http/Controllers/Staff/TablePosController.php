@@ -130,6 +130,50 @@ class TablePosController extends Controller
         return view('staff.bill', compact('session'));
     }
 
+    public function cancel(Request $request, GameTable $table)
+    {
+        if ($table->status === 'available') {
+            return response()->json(['success' => false, 'message' => 'Bàn đang trống.']);
+        }
+
+        $session = TableSession::where('table_id', $table->id)->where('status', 'playing')->first();
+        if (!$session) {
+            $table->update(['status' => 'available']);
+            return response()->json(['success' => true, 'message' => 'Đã hủy bàn.']);
+        }
+
+        DB::transaction(function () use ($session, $table) {
+            $session->orders()->update(['status' => 'cancelled']);
+            $session->update(['status' => 'cancelled', 'ended_at' => now()]);
+            $table->update(['status' => 'available']);
+        });
+
+        return response()->json(['success' => true, 'message' => 'Đã hủy bàn.']);
+    }
+
+    public function transfer(Request $request, GameTable $table)
+    {
+        $data = $request->validate(['to_table_id' => 'required|exists:tables,id']);
+        $toTable = GameTable::findOrFail($data['to_table_id']);
+
+        if ($toTable->status !== 'available') {
+            return response()->json(['success' => false, 'message' => 'Bàn đích không trống.']);
+        }
+
+        $session = TableSession::where('table_id', $table->id)->where('status', 'playing')->first();
+        if (!$session) {
+            return response()->json(['success' => false, 'message' => 'Bàn chưa được mở.']);
+        }
+
+        DB::transaction(function () use ($session, $table, $toTable) {
+            $table->update(['status' => 'available']);
+            $toTable->update(['status' => 'playing']);
+            $session->update(['table_id' => $toTable->id]);
+        });
+
+        return response()->json(['success' => true, 'message' => 'Đã chuyển bàn.']);
+    }
+
     private function getHourlyProduct(GameTable $table)
     {
         $price = $table->price_per_hour;

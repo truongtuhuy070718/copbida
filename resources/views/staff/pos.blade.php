@@ -146,8 +146,39 @@
                     </div>
                     <div class="d-grid gap-2">
                         <button id="closeBtn" class="btn btn-success btn-sm" disabled><i class="bi bi-cash-coin"></i> Thanh toán (F9)</button>
+                        <button id="cancelBtn" class="btn btn-outline-warning btn-sm" disabled><i class="bi bi-x-circle"></i> Hủy</button>
+                        <button id="transferBtn" class="btn btn-outline-info btn-sm" disabled><i class="bi bi-arrow-left-right"></i> Chuyển bàn</button>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Transfer Modal -->
+<div class="modal fade" id="transferModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Chuyển bàn</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <label class="form-label">Chọn bàn đích</label>
+                <select id="transferToTable" class="form-select">
+                    <option value="">-- Chọn bàn --</option>
+                    @foreach($tables as $area => $items)
+                        <optgroup label="{{ $area }}">
+                            @foreach($items as $t)
+                                <option value="{{ $t->id }}">{{ $t->name }}</option>
+                            @endforeach
+                        </optgroup>
+                    @endforeach
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="transferTable()">Xác nhận</button>
             </div>
         </div>
     </div>
@@ -184,6 +215,8 @@ function bindEvents(){
     document.querySelectorAll('#productGrid .product-card').forEach(card => card.addEventListener('click', () => addToCart(parseInt(card.dataset.id), card.dataset.name, parseFloat(card.dataset.price))));
 
     document.getElementById('closeBtn').addEventListener('click', closeTable);
+    document.getElementById('cancelBtn').addEventListener('click', cancelTable);
+    document.getElementById('transferBtn').addEventListener('click', showTransferModal);
 }
 
 function switchTab(tab){
@@ -209,17 +242,24 @@ function selectTable(id, name, price, playing, session){
     document.getElementById('tableStatus').textContent = id === 0 ? 'Mang về' : (playing ? 'Đang chơi' : 'Trống');
     document.getElementById('tableStatus').className = id === 0 ? 'badge bg-info' : (playing ? 'badge bg-success' : 'badge bg-secondary');
 
-    const startBtn = document.getElementById('startBtn');
     const closeBtn = document.getElementById('closeBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const transferBtn = document.getElementById('transferBtn');
     if(id === 0){
         closeBtn.disabled = false;
+        cancelBtn.disabled = true;
+        transferBtn.disabled = true;
         document.getElementById('tableInfo').textContent = 'Đơn hàng mang về';
     } else if(playing){
         closeBtn.disabled = false;
+        cancelBtn.disabled = false;
+        transferBtn.disabled = false;
         const start = new Date(session.started_at);
         document.getElementById('tableInfo').innerHTML = `Giờ vào: ${start.toLocaleTimeString()}`;
     } else {
         closeBtn.disabled = true;
+        cancelBtn.disabled = true;
+        transferBtn.disabled = true;
         document.getElementById('tableInfo').textContent = 'Đang mở bàn...';
         startTable();
     }
@@ -296,7 +336,23 @@ async function closeTable(){
         window.location.reload();
     }
 }
-
+async function cancelTable(){
+    if(!selectedTable || selectedTable.id === 0) return;
+    if(!confirm('Hủy bàn này?')) return;
+    await fetchPost(`{{ url('staff/pos') }}/${selectedTable.id}/cancel`);
+    window.location.reload();
+}
+function showTransferModal(){
+    if(!selectedTable || selectedTable.id === 0) return;
+    const modal = new bootstrap.Modal(document.getElementById('transferModal'));
+    modal.show();
+}
+async function transferTable(){
+    const toTableId = document.getElementById('transferToTable').value;
+    if(!toTableId) return alert('Vui lòng chọn bàn đích');
+    await fetchPost(`{{ url('staff/pos') }}/${selectedTable.id}/transfer`, {to_table_id: parseInt(toTableId)});
+    window.location.reload();
+}
 async function fetchPost(url, body){
     const res = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json','X-CSRF-TOKEN':'{{ csrf_token() }}'}, body: body ? JSON.stringify(body) : ''});
     return res.json();
