@@ -145,6 +145,7 @@
                         </select>
                     </div>
                     <div class="d-grid gap-2">
+                        <button id="startBtn" class="btn btn-primary btn-sm" disabled><i class="bi bi-play-circle"></i> Mở bàn (F4)</button>
                         <button id="closeBtn" class="btn btn-success btn-sm" disabled><i class="bi bi-cash-coin"></i> Thanh toán (F9)</button>
                         <button id="cancelBtn" class="btn btn-outline-warning btn-sm" disabled><i class="bi bi-x-circle"></i> Hủy</button>
                         <button id="transferBtn" class="btn btn-outline-info btn-sm" disabled><i class="bi bi-arrow-left-right"></i> Chuyển bàn</button>
@@ -214,6 +215,7 @@ function bindEvents(){
     document.querySelectorAll('.dropdown-item').forEach(item => item.addEventListener('click', (e) => { e.preventDefault(); filterCategory(item.dataset.cat); }));
     document.querySelectorAll('#productGrid .product-card').forEach(card => card.addEventListener('click', () => addToCart(parseInt(card.dataset.id), card.dataset.name, parseFloat(card.dataset.price))));
 
+    document.getElementById('startBtn').addEventListener('click', startTable);
     document.getElementById('closeBtn').addEventListener('click', closeTable);
     document.getElementById('cancelBtn').addEventListener('click', cancelTable);
     document.getElementById('transferBtn').addEventListener('click', showTransferModal);
@@ -242,26 +244,29 @@ function selectTable(id, name, price, playing, session){
     document.getElementById('tableStatus').textContent = id === 0 ? 'Mang về' : (playing ? 'Đang chơi' : 'Trống');
     document.getElementById('tableStatus').className = id === 0 ? 'badge bg-info' : (playing ? 'badge bg-success' : 'badge bg-secondary');
 
+    const startBtn = document.getElementById('startBtn');
     const closeBtn = document.getElementById('closeBtn');
     const cancelBtn = document.getElementById('cancelBtn');
     const transferBtn = document.getElementById('transferBtn');
     if(id === 0){
+        startBtn.disabled = true;
         closeBtn.disabled = false;
         cancelBtn.disabled = true;
         transferBtn.disabled = true;
         document.getElementById('tableInfo').textContent = 'Đơn hàng mang về';
     } else if(playing){
+        startBtn.disabled = true;
         closeBtn.disabled = false;
         cancelBtn.disabled = false;
         transferBtn.disabled = false;
         const start = new Date(session.started_at);
         document.getElementById('tableInfo').innerHTML = `Giờ vào: ${start.toLocaleTimeString()}`;
     } else {
+        startBtn.disabled = false;
         closeBtn.disabled = true;
         cancelBtn.disabled = true;
         transferBtn.disabled = true;
-        document.getElementById('tableInfo').textContent = 'Đang mở bàn...';
-        startTable();
+        document.getElementById('tableInfo').textContent = 'Bàn trống - bấm Mở bàn';
     }
     loadCart();
 }
@@ -415,6 +420,7 @@ function showProductsGrid(show){
 
 document.addEventListener('keydown', (e) => {
     if(e.key === 'F9'){ e.preventDefault(); closeTable(); }
+    if(e.key === 'F4'){ e.preventDefault(); startTable(); }
     if(e.key === 'F3'){ e.preventDefault(); document.getElementById('productSearch').focus(); }
 });
 function updateTimers(){
