@@ -150,11 +150,32 @@
                     </div>
                     <div class="d-grid gap-2">
                         <button id="startBtn" class="btn btn-primary btn-sm" disabled><i class="bi bi-play-circle"></i> Mở bàn (F4)</button>
+                        <button id="timeBtn" class="btn btn-outline-secondary btn-sm" disabled><i class="bi bi-clock"></i> Chỉnh giờ</button>
                         <button id="closeBtn" class="btn btn-success btn-sm" disabled><i class="bi bi-cash-coin"></i> Thanh toán (F9)</button>
                         <button id="cancelBtn" class="btn btn-outline-warning btn-sm" disabled><i class="bi bi-x-circle"></i> Hủy</button>
                         <button id="transferBtn" class="btn btn-outline-info btn-sm" disabled><i class="bi bi-arrow-left-right"></i> Chuyển bàn</button>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Time Modal -->
+<div class="modal fade" id="timeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Chỉnh giờ vào bàn</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <label class="form-label">Giờ vào</label>
+                <input type="datetime-local" id="timeStartedAt" class="form-control">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="saveTime()">Lưu</button>
             </div>
         </div>
     </div>
@@ -220,6 +241,7 @@ function bindEvents(){
     document.querySelectorAll('#productGrid .product-card').forEach(card => card.addEventListener('click', () => addToCart(parseInt(card.dataset.id), card.dataset.name, parseFloat(card.dataset.price))));
 
     document.getElementById('startBtn').addEventListener('click', startTable);
+    document.getElementById('timeBtn').addEventListener('click', showTimeModal);
     document.getElementById('closeBtn').addEventListener('click', closeTable);
     document.getElementById('cancelBtn').addEventListener('click', cancelTable);
     document.getElementById('transferBtn').addEventListener('click', showTransferModal);
@@ -249,17 +271,20 @@ function selectTable(id, name, price, playing, session){
     document.getElementById('tableStatus').className = id === 0 ? 'badge bg-info' : (playing ? 'badge bg-success' : 'badge bg-secondary');
 
     const startBtn = document.getElementById('startBtn');
+    const timeBtn = document.getElementById('timeBtn');
     const closeBtn = document.getElementById('closeBtn');
     const cancelBtn = document.getElementById('cancelBtn');
     const transferBtn = document.getElementById('transferBtn');
     if(id === 0){
         startBtn.disabled = true;
+        timeBtn.disabled = true;
         closeBtn.disabled = false;
         cancelBtn.disabled = true;
         transferBtn.disabled = true;
         document.getElementById('tableInfo').textContent = 'Đơn hàng mang về';
     } else if(playing){
         startBtn.disabled = true;
+        timeBtn.disabled = false;
         closeBtn.disabled = false;
         cancelBtn.disabled = false;
         transferBtn.disabled = false;
@@ -267,6 +292,7 @@ function selectTable(id, name, price, playing, session){
         document.getElementById('tableInfo').innerHTML = `Giờ vào: ${start.toLocaleTimeString()}`;
     } else {
         startBtn.disabled = false;
+        timeBtn.disabled = true;
         closeBtn.disabled = true;
         cancelBtn.disabled = true;
         transferBtn.disabled = true;
@@ -378,6 +404,24 @@ async function cancelTable(){
     await fetchPost(`{{ url('staff/pos') }}/${selectedTable.id}/cancel`);
     clearCart();
     window.location.reload();
+}
+function showTimeModal(){
+    if(!selectedTable || selectedTable.id === 0 || !selectedTable.playing) return;
+    const modal = new bootstrap.Modal(document.getElementById('timeModal'));
+    const current = new Date(selectedTable.session.started_at);
+    const pad = n => n.toString().padStart(2,'0');
+    document.getElementById('timeStartedAt').value = `${current.getFullYear()}-${pad(current.getMonth()+1)}-${pad(current.getDate())}T${pad(current.getHours())}:${pad(current.getMinutes())}`;
+    modal.show();
+}
+async function saveTime(){
+    const val = document.getElementById('timeStartedAt').value;
+    if(!val) return;
+    const newStart = new Date(val).toISOString();
+    selectedTable.session.started_at = newStart;
+    const card = document.querySelector(`.table-card[data-id="${selectedTable.id}"]`);
+    if(card) card.dataset.sessionStart = newStart;
+    selectTable(selectedTable.id, selectedTable.name, selectedTable.price, true, selectedTable.session);
+    bootstrap.Modal.getInstance(document.getElementById('timeModal')).hide();
 }
 function showTransferModal(){
     if(!selectedTable || selectedTable.id === 0) return;
