@@ -79,7 +79,7 @@
                         @endforeach
                     </ul>
                 </div>
-                <div class="product-grid flex-grow-1 overflow-y-auto" id="productGrid">
+                <div class="product-grid flex-grow-1 overflow-y-auto d-none" id="productGrid">
                     @foreach($products as $p)
                     <div class="product-card" data-cat="{{ $p->category_id }}" data-name="{{ strtolower($p->name) }}" onclick="addToCart({{ $p->id }}, '{{ addslashes($p->name) }}', {{ $p->price }})">
                         <div class="text-primary mb-1"><i class="bi bi-cup-straw fs-2"></i></div>
@@ -87,6 +87,10 @@
                         <div class="small text-primary fw-bold">{{ number_format($p->price) }}đ</div>
                     </div>
                     @endforeach
+                </div>
+                <div id="emptySearch" class="flex-grow-1 d-flex flex-column align-items-center justify-content-center text-muted">
+                    <i class="bi bi-search fs-1 mb-3 text-muted opacity-50"></i>
+                    <p>Nhập tên món hoặc chọn danh mục để tìm kiếm</p>
                 </div>
             </div>
         </div>
@@ -247,19 +251,26 @@ function filterArea(area){
     document.querySelector(`#areaTabs button[data-area="${area}"]`)?.classList.add('btn-primary');
     document.querySelectorAll('.table-card').forEach(el => el.style.display = (area === 'all' || el.dataset.area === area) ? 'block' : 'none');
 }
+function showProductsGrid(show){
+    document.getElementById('productGrid').classList.toggle('d-none', !show);
+    document.getElementById('emptySearch').classList.toggle('d-none', show);
+}
 function filterCategory(cat){
     const catName = document.querySelector(`.dropdown-item[href*="filterCategory(${cat === 'all' ? \"'all'\" : cat})"]`)?.textContent || 'Tất cả';
     document.getElementById('categoryDropdownBtn').textContent = catName;
     const q = document.getElementById('productSearch').value.trim().toLowerCase();
+    if(cat === 'all' && q === ''){ showProductsGrid(false); return; }
+    showProductsGrid(true);
     document.querySelectorAll('#productGrid .product-card').forEach(el => {
         el.style.display = (cat === 'all' || el.dataset.cat == cat) && el.dataset.name.includes(q) ? 'block' : 'none';
     });
 }
 function filterProducts(){
-    const cat = 'all';
     const q = document.getElementById('productSearch').value.trim().toLowerCase();
+    if(q === ''){ showProductsGrid(false); return; }
+    showProductsGrid(true);
     document.querySelectorAll('#productGrid .product-card').forEach(el => {
-        el.style.display = (cat === 'all' || el.dataset.cat == cat) && el.dataset.name.includes(q) ? 'block' : 'none';
+        el.style.display = el.dataset.name.includes(q) ? 'block' : 'none';
     });
 }
 
