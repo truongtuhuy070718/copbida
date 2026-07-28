@@ -25,8 +25,8 @@
     .table-card:hover { border-color: #0d6efd; transform: translateY(-2px); }
     .table-card.active { border-color: #0d6efd; background: #e7f1ff; }
     .table-card.playing { border-color: #198754; background: #e6f4ea; }
-    .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: .75rem; padding: .75rem; overflow-y: auto; flex: 1 1 auto; min-height: 0; }
-    .product-card { border: 1px solid #e9ecef; border-radius: .5rem; padding: .5rem; text-align: center; cursor: pointer; transition: all .15s; background: #fff; }
+    .product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: .75rem; padding: .75rem; overflow-y: auto; flex: 1 1 auto; min-height: 0; width: 100%; }
+    .product-card { border: 1px solid #e9ecef; border-radius: .5rem; padding: .75rem .5rem; text-align: center; cursor: pointer; transition: all .15s; background: #fff; min-height: 120px; }
     .product-card:hover { border-color: #0d6efd; box-shadow: 0 .25rem .5rem rgba(0,0,0,.1); }
     .cart-list { flex: 1; overflow-y: auto; padding: .75rem; }
 </style>
