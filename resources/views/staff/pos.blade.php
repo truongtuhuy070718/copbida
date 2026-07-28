@@ -193,8 +193,14 @@ function switchTab(tab){
     document.getElementById('tabMenu').classList.toggle('active', tab === 'menu');
     document.getElementById('tablesSection').classList.toggle('d-none', tab !== 'tables');
     const menuSection = document.getElementById('menuSection');
-    if(tab === 'menu'){ menuSection.classList.add('d-flex'); menuSection.classList.remove('d-none'); }
-    else { menuSection.classList.remove('d-flex'); menuSection.classList.add('d-none'); }
+    if(tab === 'menu'){
+        menuSection.classList.add('d-flex');
+        menuSection.classList.remove('d-none');
+        filterCategory('all');
+    } else {
+        menuSection.classList.remove('d-flex');
+        menuSection.classList.add('d-none');
+    }
 }
 
 function selectTable(id, name, price, playing, session){
