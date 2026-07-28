@@ -87,9 +87,9 @@
         </div>
 
         <!-- Products section -->
-        <div id="menuSection" class="flex-grow-1 overflow-hidden" style="display:none">
+        <div id="menuSection" class="flex-grow-1 overflow-hidden" style="display:none;min-width:0;">
             <div class="card shadow-sm h-100">
-                <div class="card-body d-flex flex-column">
+                <div class="card-body d-flex flex-column h-100">
                     <div class="input-group mb-2">
                         <span class="input-group-text"><i class="bi bi-search"></i></span>
                         <input type="text" class="form-control" id="productSearch2" placeholder="Tìm món">
@@ -101,7 +101,7 @@
                             @endforeach
                         </ul>
                     </div>
-                    <div class="product-grid flex-grow-1 overflow-y-auto d-none" id="productGrid" style="min-height:0;max-height:100%;">
+                    <div class="product-grid flex-grow-1 overflow-y-auto d-none" id="productGrid" style="min-height:0;">
                         @foreach($products as $p)
                         <div class="product-card" data-cat="{{ $p->category_id }}" data-name="{{ strtolower($p->name) }}" data-id="{{ $p->id }}" data-price="{{ $p->price }}">
                             <div class="text-primary mb-1"><i class="bi bi-cup-straw fs-2"></i></div>
