@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\GameTable;
-use App\Models\TableSession;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -12,7 +11,9 @@ class TableSeeder extends Seeder
     public function run(): void
     {
         DB::statement('SET FOREIGN_KEY_CHECKS=0');
-        TableSession::truncate();
+        \App\Models\OrderItem::truncate();
+        \App\Models\Order::truncate();
+        \App\Models\TableSession::truncate();
         GameTable::truncate();
         DB::statement('SET FOREIGN_KEY_CHECKS=1');
 
@@ -20,7 +21,7 @@ class TableSeeder extends Seeder
             GameTable::create([
                 'name' => 'Tầng 1 - Bàn ' . str_pad($i, 2, '0', STR_PAD_LEFT),
                 'area' => 'Tầng 1',
-                'price_per_hour' => 50000,
+                'price_per_hour' => 40000,
             ]);
         }
 
@@ -28,7 +29,7 @@ class TableSeeder extends Seeder
             GameTable::create([
                 'name' => 'Tầng VIP - Bàn ' . str_pad($i, 2, '0', STR_PAD_LEFT),
                 'area' => 'Tầng VIP',
-                'price_per_hour' => 80000,
+                'price_per_hour' => 50000,
             ]);
         }
     }

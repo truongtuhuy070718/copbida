@@ -26,41 +26,27 @@ class TablePosController extends Controller
 
     public function start(GameTable $table)
     {
-        if ($table->status != 'available') return back()->withErrors(['Bàn không khả dụng.']);
+        if ($table->status != 'available') {
+            return response()->json(['success' => false, 'message' => 'Bàn không khả dụng.']);
+        }
 
-        $serviceProduct = Product::where('name', 'Tiền giờ')->first();
-        if (!$serviceProduct) return back()->withErrors(['Chưa có sản phẩm "Tiền giờ" trong hệ thống.']);
+        $serviceProduct = $this->getHourlyProduct($table);
+        if (!$serviceProduct) {
+            return response()->json(['success' => false, 'message' => 'Chưa có sản phẩm tiền giờ trong hệ thống.']);
+        }
 
         DB::transaction(function () use ($table, $serviceProduct) {
             $table->update(['status' => 'playing']);
-            $session = TableSession::create([
+            TableSession::create([
                 'table_id' => $table->id,
                 'staff_id' => auth()->id(),
                 'started_at' => now(),
                 'hourly_rate' => $serviceProduct->price,
                 'status' => 'playing',
             ]);
-
-            $order = Order::create([
-                'table_session_id' => $session->id,
-                'order_code' => 'ORD-' . now()->format('YmdHisu'),
-                'staff_id' => auth()->id(),
-                'subtotal' => 0,
-                'total' => 0,
-                'status' => 'pending',
-            ]);
-
-            OrderItem::create([
-                'order_id' => $order->id,
-                'product_id' => $serviceProduct->id,
-                'quantity' => 0,
-                'unit_price' => $serviceProduct->price / 60,
-                'total_price' => 0,
-                'note' => 'Tiền giờ bàn ' . $table->name,
-            ]);
         });
 
-        return back()->with('success', 'Mở bàn thành công.');
+        return response()->json(['success' => true, 'message' => 'Mở bàn thành công.']);
     }
 
     public function addOrder(Request $request, GameTable $table)
@@ -102,15 +88,18 @@ class TablePosController extends Controller
         $paymentMethod = $request->input('payment_method', 'cash');
         $ended = now();
         $minutes = $session->started_at->diffInMinutes($ended);
-        $serviceProduct = Product::where('name', 'Tiền giờ')->first();
+        $serviceProduct = $this->getHourlyProduct($table);
         $pricePerMinute = $serviceProduct ? ($serviceProduct->price / 60) : ($session->hourly_rate / 60);
         $tableAmount = round($minutes * $pricePerMinute);
         $total = $tableAmount + $session->products_amount;
 
         DB::transaction(function () use ($session, $ended, $minutes, $tableAmount, $total, $paymentMethod, $table, $serviceProduct, $pricePerMinute) {
-            $order = Order::where('table_session_id', $session->id)->where('status', 'pending')->first();
+            $order = Order::firstOrCreate(
+                ['table_session_id' => $session->id, 'status' => 'pending'],
+                ['order_code' => 'ORD-' . now()->format('YmdHisu'), 'staff_id' => auth()->id(), 'subtotal' => 0, 'total' => 0]
+            );
 
-            if ($order && $serviceProduct) {
+            if ($serviceProduct) {
                 $serviceItem = $order->items()->where('product_id', $serviceProduct->id)->first();
                 if ($serviceItem) {
                     $serviceItem->update(['quantity' => $minutes, 'unit_price' => $pricePerMinute, 'total_price' => $tableAmount]);
@@ -139,5 +128,12 @@ class TablePosController extends Controller
     {
         $session->load('table', 'orders.items.product', 'staff', 'payments');
         return view('staff.bill', compact('session'));
+    }
+
+    private function getHourlyProduct(GameTable $table)
+    {
+        $price = $table->price_per_hour;
+        return Product::where('name', 'Tiền giờ ' . number_format($price / 1000, 0, ',', '.') . 'k')->where('active', true)->first()
+            ?? Product::where('name', 'like', 'Tiền giờ%')->where('active', true)->first();
     }
 }

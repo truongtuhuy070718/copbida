@@ -13,7 +13,7 @@ class ProductSeeder extends Seeder
     {
         $food = Category::firstOrCreate(['name' => 'Đồ ăn', 'type' => 'product']);
         $drink = Category::firstOrCreate(['name' => 'Đồ uống', 'type' => 'product']);
-        Category::firstOrCreate(['name' => 'Thuê bàn', 'type' => 'service']);
+        $service = Category::firstOrCreate(['name' => 'Thuê bàn', 'type' => 'service']);
 
         $unitCai = Unit::firstOrCreate(['name' => 'Cái'], ['abbreviation' => 'cái']);
         $unitChai = Unit::firstOrCreate(['name' => 'Chai'], ['abbreviation' => 'chai']);
@@ -22,13 +22,26 @@ class ProductSeeder extends Seeder
         $unitGoi = Unit::firstOrCreate(['name' => 'Gói'], ['abbreviation' => 'gói']);
         $unitGio = Unit::firstOrCreate(['name' => 'Giờ'], ['abbreviation' => 'giờ']);
 
-        $service = Category::where('name', 'Thuê bàn')->first();
         Product::updateOrCreate(
-            ['name' => 'Tiền giờ'],
+            ['name' => 'Tiền giờ 40k'],
             [
                 'category_id' => $service->id,
                 'unit_id' => $unitGio->id,
                 'price' => 40000,
+                'stock' => 999999,
+                'unit' => 'giờ',
+                'cost' => 0,
+                'min_stock' => 0,
+                'track_stock' => false,
+            ]
+        );
+
+        Product::updateOrCreate(
+            ['name' => 'Tiền giờ 50k'],
+            [
+                'category_id' => $service->id,
+                'unit_id' => $unitGio->id,
+                'price' => 50000,
                 'stock' => 999999,
                 'unit' => 'giờ',
                 'cost' => 0,

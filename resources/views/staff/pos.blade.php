@@ -145,7 +145,6 @@
                         </select>
                     </div>
                     <div class="d-grid gap-2">
-                        <button id="startBtn" class="btn btn-primary btn-sm" style="display:none"><i class="bi bi-play-fill"></i> Mở bàn</button>
                         <button id="closeBtn" class="btn btn-success btn-sm" disabled><i class="bi bi-cash-coin"></i> Thanh toán (F9)</button>
                     </div>
                 </div>
@@ -214,18 +213,16 @@ function selectTable(id, name, price, playing, session){
     const startBtn = document.getElementById('startBtn');
     const closeBtn = document.getElementById('closeBtn');
     if(id === 0){
-        startBtn.style.display = 'none';
         closeBtn.disabled = false;
         document.getElementById('tableInfo').textContent = 'Đơn hàng mang về';
     } else if(playing){
-        startBtn.style.display = 'none';
         closeBtn.disabled = false;
         const start = new Date(session.started_at);
         document.getElementById('tableInfo').innerHTML = `Giờ vào: ${start.toLocaleTimeString()}`;
     } else {
-        startBtn.style.display = 'block';
         closeBtn.disabled = true;
-        document.getElementById('tableInfo').textContent = 'Bàn trống - nhấn Mở bàn';
+        document.getElementById('tableInfo').textContent = 'Đang mở bàn...';
+        startTable();
     }
     loadCart();
 }
