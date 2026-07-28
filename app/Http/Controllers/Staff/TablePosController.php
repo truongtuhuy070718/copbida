@@ -93,7 +93,7 @@ class TablePosController extends Controller
         $total = $tableAmount + $session->products_amount;
 
         $serviceProduct = $this->getOrCreateHourlyProduct($table);
-        DB::transaction(function () use ($session, $ended, $minutes, $tableAmount, $total, $paymentMethod, $table, $serviceProduct) {
+        DB::transaction(function () use ($session, $ended, $minutes, $hours, $tableAmount, $total, $paymentMethod, $table, $serviceProduct) {
             $order = Order::firstOrCreate(
                 ['table_session_id' => $session->id, 'status' => 'pending'],
                 ['order_code' => 'ORD-' . now()->format('YmdHisu'), 'staff_id' => auth()->id(), 'subtotal' => 0, 'total' => 0]
