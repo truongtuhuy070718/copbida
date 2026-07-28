@@ -27,16 +27,39 @@ class TablePosController extends Controller
     public function start(GameTable $table)
     {
         if ($table->status != 'available') return back()->withErrors(['Bàn không khả dụng.']);
-        DB::transaction(function () use ($table) {
+
+        $serviceProduct = Product::where('name', 'Tiền giờ')->first();
+        if (!$serviceProduct) return back()->withErrors(['Chưa có sản phẩm "Tiền giờ" trong hệ thống.']);
+
+        DB::transaction(function () use ($table, $serviceProduct) {
             $table->update(['status' => 'playing']);
-            TableSession::create([
+            $session = TableSession::create([
                 'table_id' => $table->id,
                 'staff_id' => auth()->id(),
                 'started_at' => now(),
-                'hourly_rate' => $table->price_per_hour,
+                'hourly_rate' => $serviceProduct->price,
                 'status' => 'playing',
             ]);
+
+            $order = Order::create([
+                'table_session_id' => $session->id,
+                'order_code' => 'ORD-' . now()->format('YmdHisu'),
+                'staff_id' => auth()->id(),
+                'subtotal' => 0,
+                'total' => 0,
+                'status' => 'pending',
+            ]);
+
+            OrderItem::create([
+                'order_id' => $order->id,
+                'product_id' => $serviceProduct->id,
+                'quantity' => 0,
+                'unit_price' => $serviceProduct->price / 60,
+                'total_price' => 0,
+                'note' => 'Tiền giờ bàn ' . $table->name,
+            ]);
         });
+
         return back()->with('success', 'Mở bàn thành công.');
     }
 
@@ -79,15 +102,33 @@ class TablePosController extends Controller
         $paymentMethod = $request->input('payment_method', 'cash');
         $ended = now();
         $minutes = $session->started_at->diffInMinutes($ended);
-        $hours = ceil($minutes / 60);
-        $tableAmount = $hours * $session->hourly_rate;
+        $serviceProduct = Product::where('name', 'Tiền giờ')->first();
+        $pricePerMinute = $serviceProduct ? ($serviceProduct->price / 60) : ($session->hourly_rate / 60);
+        $tableAmount = round($minutes * $pricePerMinute);
         $total = $tableAmount + $session->products_amount;
 
-        DB::transaction(function () use ($session, $ended, $minutes, $tableAmount, $total, $paymentMethod, $table) {
+        DB::transaction(function () use ($session, $ended, $minutes, $tableAmount, $total, $paymentMethod, $table, $serviceProduct, $pricePerMinute) {
+            $order = Order::where('table_session_id', $session->id)->where('status', 'pending')->first();
+
+            if ($order && $serviceProduct) {
+                $serviceItem = $order->items()->where('product_id', $serviceProduct->id)->first();
+                if ($serviceItem) {
+                    $serviceItem->update(['quantity' => $minutes, 'unit_price' => $pricePerMinute, 'total_price' => $tableAmount]);
+                } else {
+                    $order->items()->create([
+                        'product_id' => $serviceProduct->id,
+                        'quantity' => $minutes,
+                        'unit_price' => $pricePerMinute,
+                        'total_price' => $tableAmount,
+                        'note' => 'Tiền giờ bàn ' . $table->name,
+                    ]);
+                }
+                $order->update(['subtotal' => $order->items()->sum('total_price'), 'total' => $order->items()->sum('total_price')]);
+            }
+
             $session->update(['ended_at' => $ended, 'duration_minutes' => $minutes, 'table_amount' => $tableAmount, 'total_amount' => $total, 'status' => 'completed']);
             $table->update(['status' => 'available']);
             Payment::create(['payable_id' => $session->id, 'payable_type' => TableSession::class, 'staff_id' => auth()->id(), 'amount' => $total, 'method' => $paymentMethod, 'paid_at' => now()]);
-            $order = Order::where('table_session_id', $session->id)->where('status', 'pending')->first();
             if ($order) $order->update(['status' => 'paid', 'paid_at' => now(), 'payment_method' => $paymentMethod]);
         });
 
