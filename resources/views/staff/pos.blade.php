@@ -289,7 +289,13 @@ function updateQty(index, delta){
     saveCart();
 }
 function removeItem(index){ cart.splice(index, 1); saveCart(); }
-function clearCart(){ cart = []; saveCart(); }
+function clearCart(){ 
+    cart = []; 
+    const all = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+    if(selectedTable) delete all[selectedTable.id];
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+    renderCart(); 
+}
 function renderCart(){
     const container = document.getElementById('cartItems');
     const totalEl = document.getElementById('cartTotal');
@@ -324,6 +330,7 @@ async function closeTable(){
         await fetchPost(`{{ url('staff/pos') }}/${selectedTable.id}/order`, {items: cart.map(i => ({product_id:i.product_id, quantity:i.quantity})), payment_method: document.getElementById('paymentMethod').value});
     }
     if(selectedTable.id !== 0 && selectedTable.playing){
+        clearCart();
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = `{{ url('staff/pos') }}/${selectedTable.id}/close`;
@@ -340,6 +347,7 @@ async function cancelTable(){
     if(!selectedTable || selectedTable.id === 0) return;
     if(!confirm('Hủy bàn này?')) return;
     await fetchPost(`{{ url('staff/pos') }}/${selectedTable.id}/cancel`);
+    clearCart();
     window.location.reload();
 }
 function showTransferModal(){
