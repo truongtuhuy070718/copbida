@@ -336,10 +336,18 @@ async function startTable(){
         if(card){
             card.classList.add('playing');
             card.dataset.playing = 'true';
-            if(!card.dataset.sessionStart) card.dataset.sessionStart = new Date().toISOString();
+            const nowIso = new Date().toISOString();
+            card.dataset.sessionStart = nowIso;
+            if(!card.querySelector('.timer')){
+                const timer = document.createElement('div');
+                timer.className = 'small text-success timer mt-1';
+                timer.dataset.start = Math.floor(Date.now()/1000);
+                timer.textContent = '0h 0m';
+                card.appendChild(timer);
+            }
         }
         selectedTable.playing = true;
-        selectedTable.session = {started_at: card?.dataset.sessionStart || new Date().toISOString()};
+        selectedTable.session = {started_at: nowIso};
         selectTable(selectedTable.id, selectedTable.name, selectedTable.price, true, selectedTable.session);
     } else {
         alert(res.message || 'Không thể mở bàn');
