@@ -25,7 +25,8 @@
     .table-card:hover { border-color: #0d6efd; transform: translateY(-2px); }
     .table-card.active { border-color: #0d6efd; background: #e7f1ff; }
     .table-card.playing { border-color: #198754; background: #e6f4ea; }
-    .product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: .75rem; padding: .75rem; overflow-y: auto; flex: 1 1 auto; min-height: 0; width: 100%; max-height: 100%; }
+    .product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: .75rem; padding: .75rem; overflow-y: auto; height: 100%; }
+    .category-list .btn { white-space: nowrap; }
     .product-card { border: 1px solid #e9ecef; border-radius: .5rem; padding: .75rem .5rem; text-align: center; cursor: pointer; transition: all .15s; background: #fff; min-height: 120px; }
     .product-card:hover { border-color: #0d6efd; box-shadow: 0 .25rem .5rem rgba(0,0,0,.1); }
     .cart-list { flex: 1; overflow-y: auto; padding: .75rem; }
@@ -89,30 +90,31 @@
         <!-- Products section -->
         <div id="menuSection" class="w-100 overflow-hidden" style="display:none;">
             <div class="card shadow-sm h-100">
-                <div class="card-body d-flex flex-column h-100">
+                <div class="card-body d-flex flex-column h-100 p-2">
                     <div class="input-group mb-2">
                         <span class="input-group-text"><i class="bi bi-search"></i></span>
                         <input type="text" class="form-control" id="productSearch2" placeholder="Tìm món">
-                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" id="categoryDropdownBtn">Tất cả</button>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="#" data-cat="all">Tất cả</a></li>
+                    </div>
+                    <div class="d-flex gap-2 flex-grow-1 overflow-hidden">
+                        <div class="category-list d-flex flex-column gap-2 p-2 bg-light rounded" style="width:180px;flex-shrink:0;overflow-y:auto;">
+                            <button class="btn btn-sm btn-primary text-start cat-btn" data-cat="all">Tất cả</button>
                             @foreach($categories as $cat)
-                            <li><a class="dropdown-item" href="#" data-cat="{{ $cat->id }}">{{ $cat->name }}</a></li>
+                            <button class="btn btn-sm btn-outline-secondary text-start cat-btn" data-cat="{{ $cat->id }}">{{ $cat->name }}</button>
                             @endforeach
-                        </ul>
-                    </div>
-                    <div class="product-grid" id="productGrid">
-                        @foreach($products as $p)
-                        <div class="product-card" data-cat="{{ $p->category_id }}" data-name="{{ strtolower($p->name) }}" data-id="{{ $p->id }}" data-price="{{ $p->price }}">
-                            <div class="text-primary mb-1"><i class="bi bi-cup-straw fs-2"></i></div>
-                            <div class="fw-bold small text-truncate">{{ $p->name }}</div>
-                            <div class="small text-primary fw-bold">{{ number_format($p->price) }}đ</div>
                         </div>
-                        @endforeach
+                        <div class="product-grid flex-grow-1" id="productGrid">
+                            @foreach($products as $p)
+                            <div class="product-card" data-cat="{{ $p->category_id }}" data-name="{{ strtolower($p->name) }}" data-id="{{ $p->id }}" data-price="{{ $p->price }}">
+                                <div class="text-primary mb-1"><i class="bi bi-cup-straw fs-2"></i></div>
+                                <div class="fw-bold small text-truncate">{{ $p->name }}</div>
+                                <div class="small text-primary fw-bold">{{ number_format($p->price) }}đ</div>
+                            </div>
+                            @endforeach
+                        </div>
                     </div>
-                    <div id="emptySearch" class="flex-grow-1 d-flex flex-column align-items-center justify-content-center text-muted">
+                    <div id="emptySearch" class="flex-grow-1 d-flex flex-column align-items-center justify-content-center text-muted d-none">
                         <i class="bi bi-search fs-1 mb-3 text-muted opacity-50"></i>
-                        <p>Nhập tên món hoặc chọn danh mục để tìm kiếm</p>
+                        <p>Không tìm thấy sản phẩm</p>
                     </div>
                 </div>
             </div>
@@ -212,7 +214,7 @@ function bindEvents(){
         selectTable(parseInt(card.dataset.id), card.dataset.name, parseFloat(card.dataset.price), card.dataset.playing === 'true', sessionStart ? {started_at: sessionStart} : null);
     }));
 
-    document.querySelectorAll('.dropdown-item').forEach(item => item.addEventListener('click', (e) => { e.preventDefault(); filterCategory(item.dataset.cat); }));
+    document.querySelectorAll('.cat-btn').forEach(btn => btn.addEventListener('click', () => filterCategory(btn.dataset.cat)));
     document.querySelectorAll('#productGrid .product-card').forEach(card => card.addEventListener('click', () => addToCart(parseInt(card.dataset.id), card.dataset.name, parseFloat(card.dataset.price))));
 
     document.getElementById('startBtn').addEventListener('click', startTable);
@@ -390,8 +392,10 @@ function filterArea(area){
     document.querySelectorAll('.table-card').forEach(el => el.style.display = (area === 'all' || el.dataset.area === area) ? 'block' : 'none');
 }
 function filterCategory(cat){
-    const item = document.querySelector(`.dropdown-item[data-cat="${cat}"]`);
-    document.getElementById('categoryDropdownBtn').textContent = item ? item.textContent : 'Tất cả';
+    document.querySelectorAll('.cat-btn').forEach(b => {
+        b.classList.toggle('btn-primary', b.dataset.cat == cat);
+        b.classList.toggle('btn-outline-secondary', b.dataset.cat != cat);
+    });
     const q = document.getElementById('productSearch2').value.trim().toLowerCase();
     showProductsGrid(true);
     document.querySelectorAll('#productGrid .product-card').forEach(el => {
