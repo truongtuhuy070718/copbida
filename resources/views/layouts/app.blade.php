@@ -10,13 +10,15 @@
     <script src="https://unpkg.com/htmx.org@1.9.12"></script>
     <style>
         :root { --sidebar-width: 260px; }
-        html, body { min-height: 100vh; overflow-x: hidden; background: #f4f6f9; }
+        html, body { min-height: 100vh; background: #f4f6f9; }
+        body { overflow-x: hidden; }
+        .app-wrapper { display: flex; min-height: 100vh; }
         .sidebar { width: var(--sidebar-width); min-height: 100vh; position: fixed; top: 0; left: 0; z-index: 1040; transition: transform .25s ease; }
-        .main-content { margin-left: var(--sidebar-width); min-width: 0; transition: margin .25s ease; }
+        .main-content { flex: 1; min-width: 0; margin-left: var(--sidebar-width); transition: margin .25s ease; }
         @media (max-width: 991.98px) {
             .sidebar { transform: translateX(-100%); }
             .sidebar.show { transform: translateX(0); }
-            .main-content { margin-left: 0; }
+            .main-content { margin-left: 0; width: 100vw; }
         }
         .nav-link { color: rgba(255,255,255,.8); }
         .nav-link:hover, .nav-link.active { color: #fff; background: rgba(255,255,255,.1); }
@@ -26,31 +28,34 @@
         [data-hx-request] .htmx-indicator { display: inline-block; }
         .htmx-indicator { display: none; }
         .product-card .card-body { word-break: break-word; }
+        .container-fluid { max-width: 100%; }
     </style>
 </head>
 <body>
-    @auth
-    @include('layouts.partials.sidebar')
-    @endauth
-
-    <div class="main-content w-100" id="mainContent">
+    <div class="app-wrapper">
         @auth
-        <nav class="navbar navbar-expand navbar-light bg-white shadow-sm sticky-top">
-            <div class="container-fluid">
-                <button class="btn btn-light d-lg-none me-2" id="sidebarToggle"><i class="bi bi-list"></i></button>
-                <span class="navbar-brand mb-0 h6 d-none d-lg-block">{{ config('app.name', 'Bida Manager') }}</span>
-                <div class="ms-auto d-flex align-items-center gap-2 gap-md-3">
-                    <span class="text-muted small d-none d-md-block">{{ auth()->user()?->name }} ({{ auth()->user()?->role }})</span>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button class="btn btn-outline-danger btn-sm"><i class="bi bi-box-arrow-right"></i></button>
-                    </form>
-                </div>
-            </div>
-        </nav>
+        @include('layouts.partials.sidebar')
         @endauth
-        <div class="container-fluid py-3" id="appContainer">
-            @yield('content')
+
+        <div class="main-content" id="mainContent">
+            @auth
+            <nav class="navbar navbar-expand navbar-light bg-white shadow-sm sticky-top">
+                <div class="container-fluid">
+                    <button class="btn btn-light d-lg-none me-2" id="sidebarToggle"><i class="bi bi-list"></i></button>
+                    <span class="navbar-brand mb-0 h6 d-none d-lg-block">{{ config('app.name', 'Bida Manager') }}</span>
+                    <div class="ms-auto d-flex align-items-center gap-2 gap-md-3">
+                        <span class="text-muted small d-none d-md-block">{{ auth()->user()?->name }} ({{ auth()->user()?->role }})</span>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button class="btn btn-outline-danger btn-sm"><i class="bi bi-box-arrow-right"></i></button>
+                        </form>
+                    </div>
+                </div>
+            </nav>
+            @endauth
+            <div class="container-fluid py-3" id="appContainer">
+                @yield('content')
+            </div>
         </div>
     </div>
 

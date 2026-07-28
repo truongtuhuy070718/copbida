@@ -4,17 +4,17 @@
 
 @section('content')
 <style>
-    .pos-container { display: grid; grid-template-columns: 1fr 340px; gap: 1rem; }
+    .pos-wrap { display: flex; gap: 1rem; }
+    .pos-products { flex: 1; min-width: 0; }
+    .pos-cart-panel { width: 340px; flex-shrink: 0; }
     @media (max-width: 991.98px) {
-        .pos-container { grid-template-columns: 1fr; }
-        .pos-cart-sticky { position: fixed; bottom: 0; left: 0; right: 0; z-index: 1030; background: #fff; border-top: 1px solid #dee2e6; box-shadow: 0 -4px 12px rgba(0,0,0,.08); }
-        .pos-cart-body { max-height: 45vh; overflow-y: auto; }
-        .pos-product-area { padding-bottom: 80px; }
+        .pos-wrap { flex-direction: column; }
+        .pos-cart-panel { width: 100%; }
     }
 </style>
 
-<div class="pos-container">
-    <div class="pos-product-area">
+<div class="pos-wrap">
+    <div class="pos-products">
         <div class="card shadow-sm">
             <div class="card-body">
                 <div class="d-flex flex-wrap gap-2 mb-3" id="categoryFilter">
@@ -40,11 +40,11 @@
         </div>
     </div>
 
-    <div class="pos-cart">
+    <div class="pos-cart-panel">
         <div class="card shadow-sm h-100" id="posCart">
             <div class="card-body d-flex flex-column">
                 <h5 class="fw-bold"><i class="bi bi-cart3"></i> Giỏ hàng</h5>
-                <div id="cartItems" class="pos-cart-body flex-grow-1 overflow-auto mb-2">
+                <div id="cartItems" class="flex-grow-1 overflow-auto mb-2" style="max-height:55vh;">
                     <div class="text-muted text-center py-5">Chưa có sản phẩm</div>
                 </div>
                 <div class="border-top pt-3 mt-auto">
