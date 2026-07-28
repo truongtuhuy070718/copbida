@@ -30,7 +30,7 @@ class TablePosController extends Controller
             return response()->json(['success' => false, 'message' => 'Bàn không khả dụng.']);
         }
 
-        $serviceProduct = $this->getHourlyProduct($table);
+        $serviceProduct = $this->getOrCreateHourlyProduct($table);
         if (!$serviceProduct) {
             return response()->json(['success' => false, 'message' => 'Chưa có sản phẩm tiền giờ trong hệ thống.']);
         }
@@ -88,12 +88,12 @@ class TablePosController extends Controller
         $paymentMethod = $request->input('payment_method', 'cash');
         $ended = now();
         $minutes = $session->started_at->diffInMinutes($ended);
-        $serviceProduct = $this->getHourlyProduct($table);
-        $pricePerMinute = $serviceProduct ? ($serviceProduct->price / 60) : ($session->hourly_rate / 60);
-        $tableAmount = round($minutes * $pricePerMinute);
+        $pricePerMinute = $table->price_per_hour / 60;
+        $tableAmount = round(($minutes * $pricePerMinute) / 1000) * 1000;
         $total = $tableAmount + $session->products_amount;
 
-        DB::transaction(function () use ($session, $ended, $minutes, $tableAmount, $total, $paymentMethod, $table, $serviceProduct, $pricePerMinute) {
+        $serviceProduct = $this->getOrCreateHourlyProduct($table);
+        DB::transaction(function () use ($session, $ended, $minutes, $tableAmount, $total, $paymentMethod, $table, $serviceProduct) {
             $order = Order::firstOrCreate(
                 ['table_session_id' => $session->id, 'status' => 'pending'],
                 ['order_code' => 'ORD-' . now()->format('YmdHisu'), 'staff_id' => auth()->id(), 'subtotal' => 0, 'total' => 0]
@@ -102,12 +102,12 @@ class TablePosController extends Controller
             if ($serviceProduct) {
                 $serviceItem = $order->items()->where('product_id', $serviceProduct->id)->first();
                 if ($serviceItem) {
-                    $serviceItem->update(['quantity' => $minutes, 'unit_price' => $pricePerMinute, 'total_price' => $tableAmount]);
+                    $serviceItem->update(['quantity' => $minutes, 'unit_price' => $table->price_per_hour, 'total_price' => $tableAmount]);
                 } else {
                     $order->items()->create([
                         'product_id' => $serviceProduct->id,
                         'quantity' => $minutes,
-                        'unit_price' => $pricePerMinute,
+                        'unit_price' => $table->price_per_hour,
                         'total_price' => $tableAmount,
                         'note' => 'Tiền giờ bàn ' . $table->name,
                     ]);
@@ -174,10 +174,32 @@ class TablePosController extends Controller
         return response()->json(['success' => true, 'message' => 'Đã chuyển bàn.']);
     }
 
-    private function getHourlyProduct(GameTable $table)
+    private function getOrCreateHourlyProduct(GameTable $table)
     {
+        $category = Category::firstOrCreate(
+            ['name' => 'Thuê bàn'],
+            ['active' => true, 'description' => 'Dịch vụ thuê bàn']
+        );
+
+        $unit = \App\Models\Unit::firstOrCreate(
+            ['name' => 'Giờ'],
+            ['abbreviation' => 'h', 'active' => true]
+        );
+
         $price = $table->price_per_hour;
-        return Product::where('name', 'Tiền giờ ' . number_format($price / 1000, 0, ',', '.') . 'k')->where('active', true)->first()
-            ?? Product::where('name', 'like', 'Tiền giờ%')->where('active', true)->first();
+        $name = 'Tiền giờ ' . number_format($price / 1000, 0, ',', '.') . 'k';
+
+        return Product::firstOrCreate(
+            ['name' => $name],
+            [
+                'category_id' => $category->id,
+                'unit_id' => $unit->id,
+                'price' => $price,
+                'cost' => 0,
+                'stock' => 999999,
+                'track_stock' => false,
+                'active' => true,
+            ]
+        );
     }
 }
