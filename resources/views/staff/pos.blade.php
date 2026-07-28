@@ -338,11 +338,15 @@ function renderCart(){
     let total = 0;
     let html = '<ul class="list-group list-group-flush">';
     cart.forEach((item, idx) => { total += item.price * item.quantity; html += `<li class="list-group-item px-0 d-flex justify-content-between align-items-center">
-            <div style="min-width:0;"><div class="fw-bold small text-truncate">${item.name}</div><div class="small text-muted">${item.price.toLocaleString()}đ x ${item.quantity}</div></div>
+            <div style="min-width:0;flex:1;">
+                <div class="fw-bold small text-truncate">${item.name}</div>
+                <div class="d-flex align-items-center gap-1 small text-muted flex-wrap">
+                    <input type="number" class="form-control form-control-sm price-input" data-idx="${idx}" value="${item.price}" style="width:80px;">đ x
+                    <input type="number" class="form-control form-control-sm qty-input" data-idx="${idx}" value="${item.quantity}" style="width:55px;text-align:center;">
+                </div>
+            </div>
             <div class="d-flex align-items-center gap-1 flex-shrink-0">
-                <button class="btn btn-sm btn-outline-secondary py-0 qty-btn" data-d="-1" data-idx="${idx}">-</button>
-                <span class="px-1 small">${item.quantity}</span>
-                <button class="btn btn-sm btn-outline-secondary py-0 qty-btn" data-d="1" data-idx="${idx}">+</button>
+                <span class="small fw-bold">${(item.price * item.quantity).toLocaleString()}đ</span>
                 <button class="btn btn-sm btn-outline-danger py-0 del-btn" data-idx="${idx}"><i class="bi bi-trash"></i></button>
             </div>
         </li>`; });
@@ -350,7 +354,8 @@ function renderCart(){
     container.innerHTML = html;
     totalEl.textContent = total.toLocaleString() + 'đ';
 
-    document.querySelectorAll('.qty-btn').forEach(btn => btn.addEventListener('click', () => updateQty(parseInt(btn.dataset.idx), parseInt(btn.dataset.d))));
+    document.querySelectorAll('.qty-input').forEach(input => input.addEventListener('change', () => { const idx=parseInt(input.dataset.idx); const val=parseInt(input.value); if(val>0){ cart[idx].quantity=val; saveCart(); } else { cart.splice(idx,1); saveCart(); } }));
+    document.querySelectorAll('.price-input').forEach(input => input.addEventListener('change', () => { const idx=parseInt(input.dataset.idx); const val=parseFloat(input.value); if(val>=0){ cart[idx].price=val; saveCart(); } }));
     document.querySelectorAll('.del-btn').forEach(btn => btn.addEventListener('click', () => removeItem(parseInt(btn.dataset.idx))));
 }
 
