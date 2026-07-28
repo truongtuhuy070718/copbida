@@ -3,7 +3,7 @@
 @section('title', 'POS Bán hàng')
 
 @section('content')
-<div class="row g-3" style="min-height:80vh;">
+<div class="row g-3 flex-lg-row flex-column-reverse flex-lg-row" style="min-height:80vh;">
     <div class="col-lg-8">
         <div class="card shadow-sm h-100">
             <div class="card-body">
@@ -15,8 +15,8 @@
                 </div>
                 <div class="row g-2" id="productGrid">
                     @foreach($products as $p)
-                    <div class="col-4 col-md-3 col-xl-2 product-item" data-cat="{{ $p->category_id }}">
-                        <div class="card card-table border-0 shadow-sm text-center h-100" onclick="addToCart({{ $p->id }}, '{{ addslashes($p->name) }}', {{ $p->price }})">
+                    <div class="col-6 col-md-4 col-xl-3 product-item" data-cat="{{ $p->category_id }}">
+                        <div class="card card-table border-0 shadow-sm text-center h-100 product-card" onclick="addToCart({{ $p->id }}, '{{ addslashes($p->name) }}', {{ $p->price }})">
                             <div class="card-body p-2">
                                 <div class="fw-bold text-truncate">{{ $p->name }}</div>
                                 <div class="small text-primary">{{ number_format($p->price) }}đ</div>
@@ -87,12 +87,12 @@ function renderCart(){
     if(!cart.length){ container.innerHTML = '<div class="text-muted text-center py-5">Chưa có sản phẩm</div>'; totalEl.textContent='0đ'; btn.disabled=true; return; }
     let total = 0;
     let html = '<ul class="list-group list-group-flush">';
-    cart.forEach((item, idx) => { total += item.price * item.quantity; html += `<li class="list-group-item px-0 d-flex justify-content-between align-items-center">
-            <div>
+    cart.forEach((item, idx) => { total += item.price * item.quantity; html += `<li class="list-group-item px-0 d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div class="text-break" style="min-width:0;">
                 <div class="fw-bold">${item.name}</div>
                 <div class="small text-muted">${item.price.toLocaleString()}đ x ${item.quantity}</div>
             </div>
-            <div class="d-flex align-items-center gap-2">
+            <div class="d-flex align-items-center gap-2 flex-shrink-0">
                 <button class="btn btn-sm btn-outline-secondary" onclick="updateQty(${idx}, -1)">-</button>
                 <span>${item.quantity}</span>
                 <button class="btn btn-sm btn-outline-secondary" onclick="updateQty(${idx}, 1)">+</button>
