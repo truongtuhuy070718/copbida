@@ -1,0 +1,210 @@
+﻿[
+    {
+        "ten":  "Cá Đuối",
+        "ma":  "SP505005056",
+        "gia":  "20000",
+        "ton":  "1.0",
+        "dvt":  "Đĩa",
+        "nhom":  "Đồ ăn"
+    },
+    {
+        "ten":  "CÁ LAO",
+        "ma":  "SP039796886",
+        "gia":  "0",
+        "ton":  "4.0",
+        "dvt":  "",
+        "nhom":  "Đồ ăn"
+    },
+    {
+        "ten":  "khăn lạnh",
+        "ma":  "SP00007878598",
+        "gia":  "500",
+        "ton":  "428.0",
+        "dvt":  "",
+        "nhom":  "Khăn"
+    },
+    {
+        "ten":  "trái cây nhỏ",
+        "ma":  "SP0505005055",
+        "gia":  "0",
+        "ton":  "########",
+        "dvt":  "",
+        "nhom":  "Đồ ăn"
+    },
+    {
+        "ten":  "mực khô lớn",
+        "ma":  "SP0005989898",
+        "gia":  "140000",
+        "ton":  "3.0",
+        "dvt":  "",
+        "nhom":  "Đồ ăn"
+    },
+    {
+        "ten":  "mực khô nhỏ",
+        "ma":  "SP05454787",
+        "gia":  "105000",
+        "ton":  "7.0",
+        "dvt":  "",
+        "nhom":  "Đồ ăn"
+    },
+    {
+        "ten":  "bia quy nhơn chai",
+        "ma":  "SP00000000005",
+        "gia":  "5000",
+        "ton":  "44.0",
+        "dvt":  "",
+        "nhom":  "Đồ Uống"
+    },
+    {
+        "ten":  "heneiken lùn",
+        "ma":  "SP000000068",
+        "gia":  "14500",
+        "ton":  "55.0",
+        "dvt":  "",
+        "nhom":  "Đồ Uống"
+    },
+    {
+        "ten":  "thuốc esse",
+        "ma":  "SP0000001379",
+        "gia":  "26000",
+        "ton":  "0.0",
+        "dvt":  "",
+        "nhom":  "Thuốc Lá"
+    },
+    {
+        "ten":  "sting dâu",
+        "ma":  "SP00000123",
+        "gia":  "7300",
+        "ton":  "1.0",
+        "dvt":  "",
+        "nhom":  "Đồ Uống"
+    },
+    {
+        "ten":  "bia quy nhon",
+        "ma":  "SP0000089",
+        "gia":  "8300",
+        "ton":  "40.0",
+        "dvt":  "",
+        "nhom":  "Đồ Uống"
+    },
+    {
+        "ten":  "thuốc jet",
+        "ma":  "SP00000045",
+        "gia":  "20000",
+        "ton":  "43.0",
+        "dvt":  "",
+        "nhom":  "Thuốc Lá"
+    },
+    {
+        "ten":  "thuốc 555 dài",
+        "ma":  "SP0000012",
+        "gia":  "36000",
+        "ton":  "4.0",
+        "dvt":  "",
+        "nhom":  "Thuốc Lá"
+    },
+    {
+        "ten":  "Heniken Lon",
+        "ma":  "SP0000",
+        "gia":  "17000",
+        "ton":  "57.0",
+        "dvt":  "",
+        "nhom":  "Đồ Uống"
+    },
+    {
+        "ten":  "Thuốc 555 Ngắn",
+        "ma":  "SP000045",
+        "gia":  "30000",
+        "ton":  "12.0",
+        "dvt":  "",
+        "nhom":  "Thuốc Lá"
+    },
+    {
+        "ten":  "Bia tiger bạc",
+        "ma":  "SP000041",
+        "gia":  "15410",
+        "ton":  "109.0",
+        "dvt":  "Lon",
+        "nhom":  "Đồ Uống"
+    },
+    {
+        "ten":  "Cá Chỉ Vàng",
+        "ma":  "SP000037",
+        "gia":  "0",
+        "ton":  "8.0",
+        "dvt":  "",
+        "nhom":  "Đồ ăn"
+    },
+    {
+        "ten":  "Trà Xanh",
+        "ma":  "SP000035",
+        "gia":  "6583",
+        "ton":  "11.0",
+        "dvt":  "Chai",
+        "nhom":  "Đồ Uống"
+    },
+    {
+        "ten":  "Pepsi",
+        "ma":  "SP000034",
+        "gia":  "6916",
+        "ton":  "2.0",
+        "dvt":  "Lon",
+        "nhom":  "Đồ Uống"
+    },
+    {
+        "ten":  "Bò Húc",
+        "ma":  "SP000033",
+        "gia":  "10160",
+        "ton":  "30.0",
+        "dvt":  "Lon",
+        "nhom":  "Đồ Uống"
+    },
+    {
+        "ten":  "Thuốc DuNhill",
+        "ma":  "SP000030",
+        "gia":  "33000",
+        "ton":  "3.0",
+        "dvt":  "Gói",
+        "nhom":  "Thuốc Lá"
+    },
+    {
+        "ten":  "Phụ Thu",
+        "ma":  "SP000027",
+        "gia":  "0",
+        "ton":  "999968.0",
+        "dvt":  "vnd",
+        "nhom":  "Tiền Giờ"
+    },
+    {
+        "ten":  "Bài",
+        "ma":  "SP000025",
+        "gia":  "5400",
+        "ton":  "0.0",
+        "dvt":  "Bộ",
+        "nhom":  "Thuốc Lá"
+    },
+    {
+        "ten":  "Trái Cây",
+        "ma":  "SP000018",
+        "gia":  "30000",
+        "ton":  "997260.0",
+        "dvt":  "Đĩa",
+        "nhom":  "Đồ ăn"
+    },
+    {
+        "ten":  "Thuốc Ngựa",
+        "ma":  "SP000016",
+        "gia":  "22700",
+        "ton":  "7.0",
+        "dvt":  "Gói",
+        "nhom":  "Thuốc Lá"
+    },
+    {
+        "ten":  "Nước Suối",
+        "ma":  "SP000013",
+        "gia":  "3400",
+        "ton":  "12.0",
+        "dvt":  "Chai",
+        "nhom":  "Đồ Uống"
+    }
+]
