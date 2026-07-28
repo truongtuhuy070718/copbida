@@ -99,7 +99,9 @@
                         <div class="category-list d-flex flex-column gap-2 p-2 bg-light rounded" style="width:180px;flex-shrink:0;overflow-y:auto;">
                             <button class="btn btn-sm btn-primary text-start cat-btn" data-cat="all">Tất cả</button>
                             @foreach($categories as $cat)
-                            <button class="btn btn-sm btn-outline-secondary text-start cat-btn" data-cat="{{ $cat->id }}">{{ $cat->name }}</button>
+                                @if($cat->name !== 'Thuê bàn')
+                                <button class="btn btn-sm btn-outline-secondary text-start cat-btn" data-cat="{{ $cat->id }}">{{ $cat->name }}</button>
+                                @endif
                             @endforeach
                         </div>
                         <div class="product-grid flex-grow-1" id="productGrid">
