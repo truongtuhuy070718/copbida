@@ -11,8 +11,15 @@
         .table-pos-wrap { flex-direction: column; height: auto; }
         .tp-right { width: 100%; }
     }
+    .kiot-nav { background: #0d6efd; padding: .5rem; border-radius: .5rem; display: flex; gap: .5rem; align-items: center; }
+    .kiot-tab { border: none; background: transparent; color: rgba(255,255,255,.75); font-weight: 500; padding: .5rem 1rem; border-radius: 2rem; white-space: nowrap; }
+    .kiot-tab.active { background: rgba(255,255,255,.2); color: #fff; }
+    .search-bar { background: rgba(255,255,255,.2); border-radius: 2rem; padding: .25rem .75rem; color: #fff; display: flex; align-items: center; gap: .5rem; flex-grow: 1; }
+    .search-bar input { background: transparent; border: none; color: #fff; outline: none; width: 100%; }
+    .search-bar input::placeholder { color: rgba(255,255,255,.75); }
+    .search-bar i { color: #fff; }
     .area-tabs { display: flex; gap: .5rem; overflow-x: auto; padding-bottom: .25rem; }
-    .area-tabs .btn { white-space: nowrap; }
+    .areas-tabs .btn { white-space: nowrap; }
     .table-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: .75rem; padding: .75rem; overflow-y: auto; }
     .table-card { border: 2px solid #e9ecef; border-radius: .75rem; padding: 1rem .5rem; text-align: center; cursor: pointer; transition: all .15s; background: #fff; }
     .table-card:hover { border-color: #0d6efd; transform: translateY(-2px); }
@@ -26,71 +33,87 @@
 
 <div class="table-pos-wrap">
     <div class="tp-left">
-        <!-- Table area tabs -->
-        <div class="card shadow-sm">
-            <div class="card-body py-2">
-                <div class="area-tabs" id="areaTabs">
-                    <button class="btn btn-sm btn-primary" data-area="all" onclick="filterArea('all')">Tất cả</button>
-                    @foreach($tables->keys() as $area)
-                        <button class="btn btn-sm btn-outline-secondary" data-area="{{ $area }}" onclick="filterArea('{{ $area }}')">{{ $area }}</button>
-                    @endforeach
+        <!-- KiotViet style top nav -->
+        <div class="kiot-nav" id="kiotNav">
+            <button class="kiot-tab active" id="tabTables" onclick="switchTab('tables')">
+                <i class="bi bi-grid"></i> Phòng bàn
+            </button>
+            <button class="kiot-tab" id="tabMenu" onclick="switchTab('menu')">
+                <i class="bi bi-journal-text"></i> Thực đơn
+            </button>
+            <div class="search-bar" id="searchBar" onclick="document.getElementById('productSearch').focus()">
+                <i class="bi bi-search"></i>
+                <input type="text" class="form-control border-0 p-0" id="productSearch" placeholder="Tìm món (F3)" onkeyup="filterProducts()">
+            </div>
+        </div>
+
+        <!-- Tables section -->
+        <div id="tablesSection">
+            <div class="card shadow-sm">
+                <div class="card-body py-2">
+                    <div class="area-tabs" id="areaTabs">
+                        <button class="btn btn-sm btn-primary" data-area="all" onclick="filterArea('all')">Tất cả</button>
+                        @foreach($tables->keys() as $area)
+                            <button class="btn btn-sm btn-outline-secondary" data-area="{{ $area }}" onclick="filterArea('{{ $area }}')">{{ $area }}</button>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm flex-grow-1 overflow-hidden">
+                <div class="card-body d-flex flex-column">
+                    <h6 class="fw-bold mb-2">Chọn bàn</h6>
+                    <div class="table-grid flex-grow-1" id="tableGrid">
+                        <div class="table-card active" data-id="0" data-area="" data-name="Mang về" onclick="selectTable(0, 'Mang về', 0, false, null)">
+                            <div class="text-primary mb-1"><i class="bi bi-bag fs-2"></i></div>
+                            <div class="fw-bold small">Mang về</div>
+                        </div>
+                        @foreach($tables as $area => $items)
+                            @foreach($items as $t)
+                            @php $session = $sessions->get($t->id); @endphp
+                            <div class="table-card {{ $t->status=='playing' ? 'playing' : '' }}" data-area="{{ $area }}" data-id="{{ $t->id }}" onclick="selectTable({{ $t->id }}, '{{ addslashes($t->name) }}', {{ $t->price_per_hour }}, {{ $t->status=='playing' ? 'true' : 'false' }}, {{ $session ? '{started_at:"' . $session->started_at->format('Y-m-d H:i:s') . '"}' : 'null' }})">
+                                <div class="text-muted mb-1"><i class="bi bi-table fs-2"></i></div>
+                                <div class="fw-bold small">{{ $t->name }}</div>
+                                <div class="small text-muted">{{ number_format($t->price_per_hour) }}đ/h</div>
+                                @if($session)
+                                    <div class="small text-success timer" data-start="{{ $session->started_at->timestamp }}">00:00</div>
+                                @endif
+                            </div>
+                            @endforeach
+                        @endforeach
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Tables grid -->
-        <div class="card shadow-sm flex-grow-1 overflow-hidden">
-            <div class="card-body d-flex flex-column">
-                <h6 class="fw-bold mb-2">Chọn bàn</h6>
-                <div class="table-grid flex-grow-1" id="tableGrid">
-                    <!-- Take away card -->
-                    <div class="table-card active" data-id="0" data-area="" data-name="Mang về" onclick="selectTable(0, 'Mang về', 0, false, null)">
-                        <div class="text-primary mb-1"><i class="bi bi-bag fs-2"></i></div>
-                        <div class="fw-bold small">Mang về</div>
+        <!-- Products section -->
+        <div id="menuSection" class="d-none flex-grow-1 overflow-hidden">
+            <div class="card shadow-sm h-100">
+                <div class="card-body d-flex flex-column">
+                    <div class="input-group mb-2">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <input type="text" class="form-control" id="productSearch2" placeholder="Tìm món" onkeyup="filterProducts2()">
+                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" id="categoryDropdownBtn">Tất cả</button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="javascript:filterCategory('all')">Tất cả</a></li>
+                            @foreach($categories as $cat)
+                            <li><a class="dropdown-item" href="javascript:filterCategory({{ $cat->id }})">{{ $cat->name }}</a></li>
+                            @endforeach
+                        </ul>
                     </div>
-                    @foreach($tables as $area => $items)
-                        @foreach($items as $t)
-                        @php $session = $sessions->get($t->id); @endphp
-                        <div class="table-card {{ $t->status=='playing' ? 'playing' : '' }}" data-area="{{ $area }}" data-id="{{ $t->id }}" onclick="selectTable({{ $t->id }}, '{{ addslashes($t->name) }}', {{ $t->price_per_hour }}, {{ $t->status=='playing' ? 'true' : 'false' }}, {{ $session ? '{started_at:"' . $session->started_at->format('Y-m-d H:i:s') . '"}' : 'null' }})">
-                            <div class="text-muted mb-1"><i class="bi bi-table fs-2"></i></div>
-                            <div class="fw-bold small">{{ $t->name }}</div>
-                            <div class="small text-muted">{{ number_format($t->price_per_hour) }}đ/h</div>
-                            @if($session)
-                                <div class="small text-success timer" data-start="{{ $session->started_at->timestamp }}">00:00</div>
-                            @endif
+                    <div class="product-grid flex-grow-1 overflow-y-auto d-none" id="productGrid">
+                        @foreach($products as $p)
+                        <div class="product-card" data-cat="{{ $p->category_id }}" data-name="{{ strtolower($p->name) }}" onclick="addToCart({{ $p->id }}, '{{ addslashes($p->name) }}', {{ $p->price }})">
+                            <div class="text-primary mb-1"><i class="bi bi-cup-straw fs-2"></i></div>
+                            <div class="fw-bold small text-truncate">{{ $p->name }}</div>
+                            <div class="small text-primary fw-bold">{{ number_format($p->price) }}đ</div>
                         </div>
                         @endforeach
-                    @endforeach
-                </div>
-            </div>
-        </div>
-
-        <!-- Products -->
-        <div class="card shadow-sm flex-grow-1 overflow-hidden">
-            <div class="card-body d-flex flex-column">
-                <div class="input-group mb-2">
-                    <span class="input-group-text"><i class="bi bi-search"></i></span>
-                    <input type="text" class="form-control" id="productSearch" placeholder="Tìm món (F3)" onkeyup="filterProducts()">
-                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" id="categoryDropdownBtn">Tất cả</button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="javascript:filterCategory('all')">Tất cả</a></li>
-                        @foreach($categories as $cat)
-                        <li><a class="dropdown-item" href="javascript:filterCategory({{ $cat->id }})">{{ $cat->name }}</a></li>
-                        @endforeach
-                    </ul>
-                </div>
-                <div class="product-grid flex-grow-1 overflow-y-auto d-none" id="productGrid">
-                    @foreach($products as $p)
-                    <div class="product-card" data-cat="{{ $p->category_id }}" data-name="{{ strtolower($p->name) }}" onclick="addToCart({{ $p->id }}, '{{ addslashes($p->name) }}', {{ $p->price }})">
-                        <div class="text-primary mb-1"><i class="bi bi-cup-straw fs-2"></i></div>
-                        <div class="fw-bold small text-truncate">{{ $p->name }}</div>
-                        <div class="small text-primary fw-bold">{{ number_format($p->price) }}đ</div>
                     </div>
-                    @endforeach
-                </div>
-                <div id="emptySearch" class="flex-grow-1 d-flex flex-column align-items-center justify-content-center text-muted">
-                    <i class="bi bi-search fs-1 mb-3 text-muted opacity-50"></i>
-                    <p>Nhập tên món hoặc chọn danh mục để tìm kiếm</p>
+                    <div id="emptySearch" class="flex-grow-1 d-flex flex-column align-items-center justify-content-center text-muted">
+                        <i class="bi bi-search fs-1 mb-3 text-muted opacity-50"></i>
+                        <p>Nhập tên món hoặc chọn danh mục để tìm kiếm</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -143,6 +166,14 @@ document.addEventListener('DOMContentLoaded', () => {
     updateTimers();
     setInterval(updateTimers, 60000);
 });
+
+function switchTab(tab){
+    document.getElementById('tabTables').classList.toggle('active', tab === 'tables');
+    document.getElementById('tabMenu').classList.toggle('active', tab === 'menu');
+    document.getElementById('tablesSection').classList.toggle('d-none', tab !== 'tables');
+    document.getElementById('menuSection').classList.toggle('d-none', tab !== 'menu');
+    if(tab === 'menu'){ document.getElementById('menuSection').classList.add('d-flex'); document.getElementById('menuSection').classList.remove('d-none'); }
+}
 
 function selectTable(id, name, price, playing, session){
     selectedTable = {id, name, price, playing, session};
@@ -251,14 +282,10 @@ function filterArea(area){
     document.querySelector(`#areaTabs button[data-area="${area}"]`)?.classList.add('btn-primary');
     document.querySelectorAll('.table-card').forEach(el => el.style.display = (area === 'all' || el.dataset.area === area) ? 'block' : 'none');
 }
-function showProductsGrid(show){
-    document.getElementById('productGrid').classList.toggle('d-none', !show);
-    document.getElementById('emptySearch').classList.toggle('d-none', show);
-}
 function filterCategory(cat){
     const catName = document.querySelector(`.dropdown-item[href*="filterCategory(${cat === 'all' ? \"'all'\" : cat})"]`)?.textContent || 'Tất cả';
     document.getElementById('categoryDropdownBtn').textContent = catName;
-    const q = document.getElementById('productSearch').value.trim().toLowerCase();
+    const q = document.getElementById('productSearch2').value.trim().toLowerCase();
     if(cat === 'all' && q === ''){ showProductsGrid(false); return; }
     showProductsGrid(true);
     document.querySelectorAll('#productGrid .product-card').forEach(el => {
@@ -267,11 +294,22 @@ function filterCategory(cat){
 }
 function filterProducts(){
     const q = document.getElementById('productSearch').value.trim().toLowerCase();
+    document.querySelectorAll('#productGrid .product-card').forEach(el => {
+        el.style.display = el.dataset.name.includes(q) ? 'block' : 'none';
+    });
+    if(q) switchTab('menu');
+}
+function filterProducts2(){
+    const q = document.getElementById('productSearch2').value.trim().toLowerCase();
     if(q === ''){ showProductsGrid(false); return; }
     showProductsGrid(true);
     document.querySelectorAll('#productGrid .product-card').forEach(el => {
         el.style.display = el.dataset.name.includes(q) ? 'block' : 'none';
     });
+}
+function showProductsGrid(show){
+    document.getElementById('productGrid').classList.toggle('d-none', !show);
+    document.getElementById('emptySearch').classList.toggle('d-none', show);
 }
 
 document.addEventListener('keydown', (e) => {
