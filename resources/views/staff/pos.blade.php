@@ -87,7 +87,7 @@
         </div>
 
         <!-- Products section -->
-        <div id="menuSection" class="d-none flex-grow-1 overflow-hidden">
+        <div id="menuSection" class="flex-grow-1 overflow-hidden" style="display:none">
             <div class="card shadow-sm h-100">
                 <div class="card-body d-flex flex-column">
                     <div class="input-group mb-2">
@@ -194,11 +194,11 @@ function switchTab(tab){
     document.getElementById('tablesSection').classList.toggle('d-none', tab !== 'tables');
     const menuSection = document.getElementById('menuSection');
     if(tab === 'menu'){
-        menuSection.classList.add('d-flex');
+        menuSection.style.display = 'flex';
         menuSection.classList.remove('d-none');
         filterCategory('all');
     } else {
-        menuSection.classList.remove('d-flex');
+        menuSection.style.display = 'none';
         menuSection.classList.add('d-none');
     }
 }
