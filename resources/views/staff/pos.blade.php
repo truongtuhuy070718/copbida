@@ -68,15 +68,16 @@
         <!-- Products -->
         <div class="card shadow-sm flex-grow-1 overflow-hidden">
             <div class="card-body d-flex flex-column">
-                <div class="d-flex gap-2 overflow-auto mb-2" id="categoryTabs">
-                    <button class="btn btn-sm btn-primary" data-cat="all" onclick="filterCategory('all')">Tất cả</button>
-                    @foreach($categories as $cat)
-                        <button class="btn btn-sm btn-outline-secondary" data-cat="{{ $cat->id }}" onclick="filterCategory({{ $cat->id }})">{{ $cat->name }}</button>
-                    @endforeach
-                </div>
                 <div class="input-group mb-2">
                     <span class="input-group-text"><i class="bi bi-search"></i></span>
                     <input type="text" class="form-control" id="productSearch" placeholder="Tìm món (F3)" onkeyup="filterProducts()">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" id="categoryDropdownBtn">Tất cả</button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="javascript:filterCategory('all')">Tất cả</a></li>
+                        @foreach($categories as $cat)
+                        <li><a class="dropdown-item" href="javascript:filterCategory({{ $cat->id }})">{{ $cat->name }}</a></li>
+                        @endforeach
+                    </ul>
                 </div>
                 <div class="product-grid flex-grow-1 overflow-y-auto" id="productGrid">
                     @foreach($products as $p)
@@ -247,17 +248,16 @@ function filterArea(area){
     document.querySelectorAll('.table-card').forEach(el => el.style.display = (area === 'all' || el.dataset.area === area) ? 'block' : 'none');
 }
 function filterCategory(cat){
-    document.querySelectorAll('#categoryTabs button').forEach(b => { b.classList.remove('btn-primary'); b.classList.add('btn-outline-secondary'); });
-    document.querySelector(`#categoryTabs button[data-cat="${cat}"]`)?.classList.remove('btn-outline-secondary');
-    document.querySelector(`#categoryTabs button[data-cat="${cat}"]`)?.classList.add('btn-primary');
+    const catName = document.querySelector(`.dropdown-item[href*="filterCategory(${cat === 'all' ? \"'all'\" : cat})"]`)?.textContent || 'Tất cả';
+    document.getElementById('categoryDropdownBtn').textContent = catName;
     const q = document.getElementById('productSearch').value.trim().toLowerCase();
     document.querySelectorAll('#productGrid .product-card').forEach(el => {
         el.style.display = (cat === 'all' || el.dataset.cat == cat) && el.dataset.name.includes(q) ? 'block' : 'none';
     });
 }
 function filterProducts(){
+    const cat = 'all';
     const q = document.getElementById('productSearch').value.trim().toLowerCase();
-    const cat = document.querySelector('#categoryTabs .btn-primary')?.dataset.cat || 'all';
     document.querySelectorAll('#productGrid .product-card').forEach(el => {
         el.style.display = (cat === 'all' || el.dataset.cat == cat) && el.dataset.name.includes(q) ? 'block' : 'none';
     });
