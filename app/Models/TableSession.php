@@ -20,5 +20,5 @@ class TableSession extends Model
     public function table() { return $this->belongsTo(GameTable::class, 'table_id'); }
     public function staff() { return $this->belongsTo(User::class, 'staff_id'); }
     public function orders() { return $this->hasMany(Order::class); }
-    public function payments() { return $this->morphToMany(Payment::class, 'payable'); }
+    public function payments() { return $this->morphMany(Payment::class, 'payable'); }
 }
