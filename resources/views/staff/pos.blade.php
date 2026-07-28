@@ -321,8 +321,13 @@ function renderCart(){
 
 async function startTable(){
     if(!selectedTable || selectedTable.id === 0) return;
-    await fetchPost(`{{ url('staff/pos') }}/${selectedTable.id}/start`);
-    window.location.reload();
+    const res = await fetchPost(`{{ url('staff/pos') }}/${selectedTable.id}/start`);
+    if(res.success){
+        selectedTable.playing = true;
+        selectTable(selectedTable.id, selectedTable.name, selectedTable.price, true, {started_at: new Date().toISOString()});
+    } else {
+        alert(res.message || 'Không thể mở bàn');
+    }
 }
 async function closeTable(){
     if(!selectedTable) return;
