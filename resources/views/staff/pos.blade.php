@@ -317,7 +317,6 @@ function filterCategory(cat){
     const item = document.querySelector(`.dropdown-item[data-cat="${cat}"]`);
     document.getElementById('categoryDropdownBtn').textContent = item ? item.textContent : 'Tất cả';
     const q = document.getElementById('productSearch2').value.trim().toLowerCase();
-    if(cat === 'all' && q === ''){ showProductsGrid(false); return; }
     showProductsGrid(true);
     document.querySelectorAll('#productGrid .product-card').forEach(el => {
         el.style.display = (cat === 'all' || el.dataset.cat == cat) && el.dataset.name.includes(q) ? 'block' : 'none';
