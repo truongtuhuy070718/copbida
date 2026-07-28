@@ -88,8 +88,8 @@ class TablePosController extends Controller
         $paymentMethod = $request->input('payment_method', 'cash');
         $ended = now();
         $minutes = $session->started_at->diffInMinutes($ended);
-        $pricePerMinute = $table->price_per_hour / 60;
-        $tableAmount = round(($minutes * $pricePerMinute) / 1000) * 1000;
+        $hours = round($minutes / 60, 2);
+        $tableAmount = round(($hours * $table->price_per_hour) / 1000) * 1000;
         $total = $tableAmount + $session->products_amount;
 
         $serviceProduct = $this->getOrCreateHourlyProduct($table);
@@ -102,11 +102,11 @@ class TablePosController extends Controller
             if ($serviceProduct) {
                 $serviceItem = $order->items()->where('product_id', $serviceProduct->id)->first();
                 if ($serviceItem) {
-                    $serviceItem->update(['quantity' => $minutes, 'unit_price' => $table->price_per_hour, 'total_price' => $tableAmount]);
+                    $serviceItem->update(['quantity' => $hours, 'unit_price' => $table->price_per_hour, 'total_price' => $tableAmount]);
                 } else {
                     $order->items()->create([
                         'product_id' => $serviceProduct->id,
-                        'quantity' => $minutes,
+                        'quantity' => $hours,
                         'unit_price' => $table->price_per_hour,
                         'total_price' => $tableAmount,
                         'note' => 'Tiền giờ bàn ' . $table->name,
@@ -186,15 +186,12 @@ class TablePosController extends Controller
             ['abbreviation' => 'h', 'active' => true]
         );
 
-        $price = $table->price_per_hour;
-        $name = 'Tiền giờ ' . number_format($price / 1000, 0, ',', '.') . 'k';
-
         return Product::firstOrCreate(
-            ['name' => $name],
+            ['name' => 'Tiền giờ'],
             [
                 'category_id' => $category->id,
                 'unit_id' => $unit->id,
-                'price' => $price,
+                'price' => $table->price_per_hour,
                 'cost' => 0,
                 'stock' => 999999,
                 'track_stock' => false,
