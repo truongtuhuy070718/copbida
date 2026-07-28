@@ -229,7 +229,7 @@ function switchTab(tab){
     document.getElementById('tablesSection').classList.toggle('d-none', tab !== 'tables');
     const menuSection = document.getElementById('menuSection');
     if(tab === 'menu'){
-        menuSection.style.display = 'flex';
+        menuSection.style.display = 'block';
         menuSection.classList.remove('d-none');
         filterCategory('all');
     } else {
