@@ -10,8 +10,6 @@ use App\Http\Controllers\Admin\InventoryController;
 use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\BillController;
-use App\Http\Controllers\Staff\PosController;
-use App\Http\Controllers\Staff\TableController as StaffTableController;
 use App\Http\Controllers\Staff\TablePosController;
 
 // Auth
@@ -56,16 +54,8 @@ Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(functi
 
 // Staff
 Route::middleware(['role:staff'])->prefix('staff')->name('staff.')->group(function () {
-    Route::get('/pos', [PosController::class, 'index'])->name('pos');
-    Route::post('/pos/checkout', [PosController::class, 'checkout'])->name('pos.checkout');
-
-    Route::get('/tables', [StaffTableController::class, 'index'])->name('tables');
-    Route::post('/tables/{table}/start', [StaffTableController::class, 'start'])->name('tables.start');
-    Route::post('/tables/{table}/order', [StaffTableController::class, 'order'])->name('tables.order');
-    Route::post('/tables/{table}/close', [StaffTableController::class, 'close'])->name('tables.close');
-
-    Route::get('/table-pos', [TablePosController::class, 'index'])->name('table_pos');
-    Route::post('/table-pos/{table}/start', [TablePosController::class, 'start'])->name('table_pos.start');
-    Route::post('/table-pos/{table}/order', [TablePosController::class, 'addOrder'])->name('table_pos.order');
-    Route::post('/table-pos/{table}/close', [TablePosController::class, 'close'])->name('table_pos.close');
+    Route::get('/pos', [TablePosController::class, 'index'])->name('pos');
+    Route::post('/pos/{table}/start', [TablePosController::class, 'start'])->name('pos.start');
+    Route::post('/pos/{table}/order', [TablePosController::class, 'addOrder'])->name('pos.order');
+    Route::post('/pos/{table}/close', [TablePosController::class, 'close'])->name('pos.close');
 });

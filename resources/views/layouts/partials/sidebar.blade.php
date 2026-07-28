@@ -44,11 +44,6 @@
                     <i class="bi bi-cart3 me-2"></i> POS Bán hàng
                 </a>
             </li>
-            <li class="nav-item mb-1">
-                <a href="{{ route('staff.tables') }}" class="nav-link rounded {{ request()->routeIs('staff.tables') ? 'active' : '' }}">
-                    <i class="bi bi-table me-2"></i> Sơ đồ bàn
-                </a>
-            </li>
             @endif
         </ul>
         <div class="p-3 text-white-50 small">

@@ -21,7 +21,7 @@ class TablePosController extends Controller
         $sessions = TableSession::where('status', 'playing')->with('table', 'orders.items.product')->get()->keyBy('table_id');
         $categories = Category::where('active', true)->orderBy('name')->get();
         $products = Product::with('category')->where('active', true)->where('stock', '>', 0)->orderBy('name')->get();
-        return view('staff.table_pos', compact('tables', 'sessions', 'categories', 'products'));
+        return view('staff.pos', compact('tables', 'sessions', 'categories', 'products'));
     }
 
     public function start(GameTable $table)
